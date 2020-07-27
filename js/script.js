@@ -9,9 +9,58 @@
 // 3. Lingua
 // 4. Voto
 
+// API TMDB (THE MOVIE DATA BASE) sito internet che fornisce un api gratuita per accedere al suo database di dati su film serie tv ecc.
+// Hi mcurtaz,
+
+// Your request for an API key has been approved. You can start using this key immediately.
+//
+// API Key: db8b1c040d8d94836ca1164e898cff48
+//
+// An example request looks like:
+// https://api.themoviedb.org/3/movie/550?api_key=db8b1c040d8d94836ca1164e898cff48
+
+//Documentation: https://www.themoviedb.org/documentation/api
 
 $(document).ready(init);
 
 function init() {
-  console.log("hello world!");
+  addListeners();
+}
+
+function addListeners() {
+
+ var buttonTarget = $("#btn-searchbar");
+
+ buttonTarget.click(sendRequest);
+
+ var keyupTarget = $("#searchbar");
+
+ keyupTarget.keyup(function(event){
+
+   if(event.which == 13){
+     sendRequest();
+   }
+
+ });
+
+}
+
+function sendRequest() {
+  var input = $("#searchbar").val();
+
+  $.ajax({
+    url: "https://api.themoviedb.org/3/search/movie",
+    method: "GET",
+    data: {
+      "api_key": "db8b1c040d8d94836ca1164e898cff48",
+      "query": input
+    },
+    success: function (data, success) {
+      console.log("data", data);
+      console.log("success", success);
+    },
+    error: function (err) {
+      console.log("err", err);
+    }
+  });
 }
