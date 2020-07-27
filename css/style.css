@@ -53,6 +53,23 @@ header #btn-searchbar{
   padding-bottom: 15px;
 }
 
+.search-results-heading{
+  width: 100%;
+
+  display: flex;
+  justify-content: flex-start;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.search-results-heading>div{
+  width: 25%;
+  padding: 12px;
+  border: 1px solid black;
+
+  text-align: center;
+}
+
 #search-results li{
   width: 100%;
 
@@ -65,7 +82,7 @@ header #btn-searchbar{
   padding: 12px;
   border: 1px solid black;
 
-  font-size: 18px;
+  font-size: 15px;
   text-align: center;
 
   white-space: nowrap;
@@ -73,16 +90,6 @@ header #btn-searchbar{
   text-overflow: ellipsis;
 }
 
-#search-results li>div:first-child{
-  width: 25%;
-  padding: 12px;
-  border: 1px solid black;
+#search-results li:first-child>div{
 
-  font-size: 22px;
-  font-weight: 800;
-  text-align: center;
-
-  white-space: nowrap;
-  overflow:hidden;
-  text-overflow: ellipsis;
 }

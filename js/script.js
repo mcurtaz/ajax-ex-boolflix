@@ -53,14 +53,43 @@ function sendRequest() {
     method: "GET",
     data: {
       "api_key": "db8b1c040d8d94836ca1164e898cff48",
-      "query": input
+      "query": input,
+      "language": "it-IT"
     },
     success: function (data, success) {
-      console.log("data", data);
-      console.log("success", success);
+
+      if(success == "success"){
+        printSearchResults(data["results"]);
+      }
     },
     error: function (err) {
       console.log("err", err);
     }
   });
+}
+
+function printSearchResults(arrayResults) {
+
+  var template = $("#result-template").html();
+  var compiled = Handlebars.compile(template);
+  var target = $("#search-results");
+
+  target.text("");
+
+  for (var i = 0; i < arrayResults.length; i++) {
+
+    var objectCompile = {
+        "title": arrayResults[i]["title"],
+        "originalTitle": arrayResults[i]["original_title"],
+        "language": arrayResults[i]["original_language"],
+        "vote": arrayResults[i]["vote_average"]
+    };
+
+    var newItem = compiled(objectCompile);
+
+    target.append(newItem);
+
+  }
+
+
 }
