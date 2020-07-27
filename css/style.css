@@ -1,0 +1,88 @@
+/* REGOLE GENERALI */
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+  font-family: "lato", sans-serif;
+  background-color: #f1f1f1;
+}
+
+ul {
+  list-style: none;
+}
+
+.rientro{
+  padding-left: 15%;
+  padding-right: 15%;
+}
+
+/* HEADER */
+
+header{
+  padding-top: 15px;
+  padding-bottom: 15px;
+  background-color: #000;
+  text-align: center;
+  font-size: 18px;
+}
+
+header label{
+  color:#fff;
+}
+
+header #searchbar{
+  width: 25%;
+  height: 30px;
+  border-radius: 8px;
+}
+
+header #btn-searchbar{
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+
+/* SEZIONE RISULTATI RICERCA */
+
+.result-display{
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+#search-results li{
+  width: 100%;
+
+  display: flex;
+  justify-content: flex-start;
+}
+
+#search-results li>div{
+  width: 25%;
+  padding: 12px;
+  border: 1px solid black;
+
+  font-size: 18px;
+  text-align: center;
+
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
+
+#search-results li>div:first-child{
+  width: 25%;
+  padding: 12px;
+  border: 1px solid black;
+
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
