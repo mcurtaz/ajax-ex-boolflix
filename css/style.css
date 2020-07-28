@@ -90,6 +90,10 @@ header #btn-searchbar{
   text-overflow: ellipsis;
 }
 
-#search-results li:first-child>div{
+#search-results li .stars{
+  color: #ccc;
+}
 
+#search-results li .stars .col-y{
+  color: #f1f1b1;
 }
