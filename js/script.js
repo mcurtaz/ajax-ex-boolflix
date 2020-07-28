@@ -101,21 +101,31 @@ function printSearchResults(arrayResults) {
 
 
   var compiled = Handlebars.compile(template); // nella variabile compiled ci sarà un funzione di handlebars che compila il template sostituendo le chiavi con i valori corrispondenti
-  var target = $("#search-results"); // il target è dove andrò ad appendere l'html compilato da handlebars
+  var target = $("#films-search-results"); // il target è dove andrò ad appendere l'html compilato da handlebars
 
   target.text(""); // prima svuoto il target dalle ricerche precedenti
 
-  for (var i = 0; i < arrayResults.length; i++) {
+  for (var i = 0; i < arrayResults.length; i++) { // scorro tutti i risultati e li stampo in pagina
 
-    var stars = getStars(arrayResults[i]);
+    var stars = getStars(arrayResults[i]); // salvo nella variabile stars il risultato della funzione getStars passandogli come argomento l'oggetto contenete i dati del film.
 
-    arrayResults[i]["stars"] = stars;
+    arrayResults[i]["stars"] = stars; // creo una nuova chiave nell'oggetto che contiene i dati del film. Quindi con handlebars utilizzo una serie di chiavi che ha già per compilare titolo del film e così. in questa nuova chiave invece salvo il codice html creato dalla funzione getStars per stampare il voto in forma grafica
 
-    var newItem = compiled(arrayResults[i]);
+    // ATTENZIONE: per comporre le stringhe invece di fare virgolette, apici, barra per saltare il carattere, più variabile ecc. si può utilizzare il carattere backtick (apici storti). In questo modo tra i due apici storti c'è la stringa intera a prescindere da virgolette apici singoli ecc. per metterci una variabile si uns ${variabile}. è una caratteristica di JS. non viene da librerie particolari. JS puro si chiama anche JS PLAIN o VANILLA
 
-    target.append(newItem);
+    var languageImg = `<img src="./img/flag/flag-${arrayResults[i]["original_language"]}.png" alt="flag-${arrayResults[i]["original_language"]}">`; // creo una variabile con una riga di codice html di un immagine. la src="" è composta dall'url che trova la cartella con le bandiere. i nomi delle bandiere sono sempre flag-(lingua).png la lingua la prendo dall'oggetto mandato dall'API alla chiave original_language. quindi per ogni lingua metterò nel template di Handlebars l'immagine della barriera corrispondente. Stampati tutti i risultati la funzione missingFlag interverrà in caso di immagine bandiera mancante
+
+
+    arrayResults[i]["languageImg"] = languageImg;
+
+
+    var newItem = compiled(arrayResults[i]); // compilo il template handlebars con i dati del film. utilizzo in handlebars le stesse chiavi utilizzate nell'oggetto arrivato dall'API in modo da potergli passare esattamente quell'oggetto senza crearne uno apposito. A quell'oggetto però ho aggiunto la chiave stars per il voto in forma grafica.
+
+    target.append(newItem); // stampo nell'html il template compilato
 
   }
+
+  missingFlag();
 
 
 }
@@ -123,17 +133,33 @@ function printSearchResults(arrayResults) {
 
 function getStars(obj) {
 
-  var vote = obj["vote_average"];
+  var vote = obj["vote_average"]; // prendo dall'oggetto dell'API il voto in decimali
 
-  var numFullStars = Math.ceil(vote / 2);
+  var numFullStars = Math.ceil(vote / 2); // il voto in decimali diviso per due e arrotondato per eccesso (Math.ceil) mi dice quante stelle devo essere "piene"
+
   var stars = "";
-  for (var i = 0; i < 5; i++) {
-    if (i < numFullStars) {
+
+  for (var i = 0; i < 5; i++) { // ciclo for 5 volte per le 5 stelle
+
+    if (i < numFullStars) { // se la i è minore al numero di stelle piene che devo creare aggiungo alla stringa contenuta nella variabile star il codice html che crea una stella piena (utilizzando fontawesome)
       stars += `<i class="fas fa-star col-y"></i>`
-    } else {
+    } else { //  se ho già creato tutte le stelle piene continuo a ciclare fino a 5 aggiungendo alla stringa il codice html che crea stelle vuote.
       stars += `<i class="far fa-star"></i>`
     }
   }
 
-  return stars
+  return stars // la funzione ritorna una stringa che sarà una serie di "<i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>". Nell'html si vedranno 5 stelle.
+}
+
+function missingFlag() { // finito di stampare tutti i risultati della ricerca
+
+  $(".language img").on("error", function(){ // se c'è un errore nei tag selezionati (tutte le img contenute in un elemento con classe .language cioè tutte le immagini delle bandiere della lingua). si attiva la funzione. Se non trova l'immagine perchè non esiste da errore e quindi si attiva la funzione
+
+    var target = $(this).parents(".language"); // $(this) è l'immagine che ha dato errore e ha triggerato la funzione. il parents con classe .language è il div che la contiene.
+
+    var lng = target.data("lng"); // la funzione che stampa i risultati della ricerca salva nell'attributo data-lng del div la lingua del film (it per italiano, en per inglese ecc ). la vado a recuperare, la salvo nella variabile, e la sostituisco all'immagine "rotta". Sostituisco l'intero contenuto del target.
+    
+    target.text(lng);
+
+  });
 }

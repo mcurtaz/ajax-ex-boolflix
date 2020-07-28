@@ -70,14 +70,14 @@ header #btn-searchbar{
   text-align: center;
 }
 
-#search-results li{
+#films-search-results li{
   width: 100%;
 
   display: flex;
   justify-content: flex-start;
 }
 
-#search-results li>div{
+#films-search-results li>div{
   width: 25%;
   padding: 12px;
   border: 1px solid black;
@@ -90,10 +90,10 @@ header #btn-searchbar{
   text-overflow: ellipsis;
 }
 
-#search-results li .stars{
+#films-search-results li .stars{
   color: #ccc;
 }
 
-#search-results li .stars .col-y{
+#films-search-results li .stars .col-y{
   color: #f1f1b1;
 }
