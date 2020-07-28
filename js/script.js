@@ -45,28 +45,44 @@ function addListeners() {
 
  var buttonTarget = $("#btn-searchbar");
 
- buttonTarget.click(sendRequest); // al click sul bottone "cerca" lancio la funzione sendRequest
+ buttonTarget.click(function(){// al click sul bottone "cerca" lancio la funzione sendRequest
+
+   var input = $("#searchbar").val(); // prendo la stringa nell'input scritta dall'utente
+
+   $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
+
+   sendRequest(input, "films");
+   sendRequest(input,"tv");
+ });
 
  var keyupTarget = $("#searchbar");
 
  keyupTarget.keyup(function(event){ // listener del keyup sull'input "searchbar". Ascolta la pressione dei tasti sulla tastiera quando il focus è sulla barra di ricerca (la barra di ricerca è "selezionata")
 
    if(event.which == 13){ // se si preme invio lancio la funzione send request
-     sendRequest();
+
+     var input = $("#searchbar").val(); // prendo la stringa nell'input scritta dall'utente
+
+     $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
+
+     sendRequest(input,"films");
+     sendRequest(input,"tv");
    }
 
  });
 
 }
 
-function sendRequest() {
+function sendRequest(input, type) {
 
-  var input = $("#searchbar").val(); // prendo la stringa nell'input scritta dall'utente
-
-  $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
+  if(type == "films"){
+    var url = "https://api.themoviedb.org/3/search/movie"; // url dell'API di TMDB per ricerca nei film
+  } else {
+    var url = "https://api.themoviedb.org/3/search/tv"; // url dell'API di TMDB per ricerca nelle serietv
+  }
 
   $.ajax({
-    url: "https://api.themoviedb.org/3/search/movie", // url dell'API di TMDB
+    url: url,
     method: "GET",
     data: {
       "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
@@ -74,18 +90,22 @@ function sendRequest() {
       "language": "it-IT" // scelgo la lingua italiana
     },
     success: function (data, success) {
+        if (data["results"].length == 0){
+          $(`#${type}-search-results`).html(`<h3>Mi dispiace non abbiamo trovato risultati per questa categoria.</h3>`);
+        } else{
+          printSearchResults(data["results"], type); // se la API va a buon fine lancio la funzione che stampa i risultati. come argomento della funzione gli passo l'array di oggetti mandatomi dall'API
+        }
 
-        printSearchResults(data["results"]); // se la API va a buon fine lancio la funzione che stampa i risultati. come argomento della funzione gli passo l'array di oggetti mandatomi dall'API
 
     },
     error: function (err) {
-      console.log("err", err);
+      $(`#${type}-search-results`).html(`<h3>Ops! Qualcosa è andato storto. Riprova</h3>`);
     }
   });
 
 }
 
-function printSearchResults(arrayResults) {
+function printSearchResults(arrayResults, type) {
 
   var template = $("#result-template").html(); // salvo il template per handlebars in una variabile
 
@@ -101,25 +121,33 @@ function printSearchResults(arrayResults) {
 
 
   var compiled = Handlebars.compile(template); // nella variabile compiled ci sarà un funzione di handlebars che compila il template sostituendo le chiavi con i valori corrispondenti
-  var target = $("#films-search-results"); // il target è dove andrò ad appendere l'html compilato da handlebars
+  var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results. uso la variabile passata dalla funzione sendRequest
 
   target.text(""); // prima svuoto il target dalle ricerche precedenti
 
   for (var i = 0; i < arrayResults.length; i++) { // scorro tutti i risultati e li stampo in pagina
 
-    var stars = getStars(arrayResults[i]); // salvo nella variabile stars il risultato della funzione getStars passandogli come argomento l'oggetto contenete i dati del film.
+    var currentObj = arrayResults[i];
 
-    arrayResults[i]["stars"] = stars; // creo una nuova chiave nell'oggetto che contiene i dati del film. Quindi con handlebars utilizzo una serie di chiavi che ha già per compilare titolo del film e così. in questa nuova chiave invece salvo il codice html creato dalla funzione getStars per stampare il voto in forma grafica
+    var stars = getStars(currentObj); // salvo nella variabile stars il risultato della funzione getStars passandogli come argomento l'oggetto contenete i dati del film.
+
+    currentObj["stars"] = stars; // creo una nuova chiave nell'oggetto che contiene i dati del film. Quindi con handlebars utilizzo una serie di chiavi che ha già per compilare titolo del film e così. in questa nuova chiave invece salvo il codice html creato dalla funzione getStars per stampare il voto in forma grafica
 
     // ATTENZIONE: per comporre le stringhe invece di fare virgolette, apici, barra per saltare il carattere, più variabile ecc. si può utilizzare il carattere backtick (apici storti). In questo modo tra i due apici storti c'è la stringa intera a prescindere da virgolette apici singoli ecc. per metterci una variabile si uns ${variabile}. è una caratteristica di JS. non viene da librerie particolari. JS puro si chiama anche JS PLAIN o VANILLA
 
-    var languageImg = `<img src="./img/flag/flag-${arrayResults[i]["original_language"]}.png" alt="flag-${arrayResults[i]["original_language"]}">`; // creo una variabile con una riga di codice html di un immagine. la src="" è composta dall'url che trova la cartella con le bandiere. i nomi delle bandiere sono sempre flag-(lingua).png la lingua la prendo dall'oggetto mandato dall'API alla chiave original_language. quindi per ogni lingua metterò nel template di Handlebars l'immagine della barriera corrispondente. Stampati tutti i risultati la funzione missingFlag interverrà in caso di immagine bandiera mancante
+    var languageImg = `<img src="./img/flag/flag-${currentObj["original_language"]}.png" alt="flag-${currentObj["original_language"]}">`; // creo una variabile con una riga di codice html di un immagine. la src="" è composta dall'url che trova la cartella con le bandiere. i nomi delle bandiere sono sempre flag-(lingua).png la lingua la prendo dall'oggetto mandato dall'API alla chiave original_language. quindi per ogni lingua metterò nel template di Handlebars l'immagine della barriera corrispondente. Stampati tutti i risultati la funzione missingFlag interverrà in caso di immagine bandiera mancante
 
 
-    arrayResults[i]["languageImg"] = languageImg;
+    currentObj["languageImg"] = languageImg;
 
+    // alcune chiavi dell'oggetto mandato dall'API cambiano se la ricerca è per film o serie tv. nello specifico a me servono title e original_title che per le serie tv si chiamano name e original_name
 
-    var newItem = compiled(arrayResults[i]); // compilo il template handlebars con i dati del film. utilizzo in handlebars le stesse chiavi utilizzate nell'oggetto arrivato dall'API in modo da potergli passare esattamente quell'oggetto senza crearne uno apposito. A quell'oggetto però ho aggiunto la chiave stars per il voto in forma grafica.
+    if(type == "tv"){
+      currentObj["title"] = currentObj["name"];
+      currentObj["original_title"] = currentObj["original_name"];
+    }
+
+    var newItem = compiled(currentObj); // compilo il template handlebars con i dati del film. utilizzo in handlebars le stesse chiavi utilizzate nell'oggetto arrivato dall'API in modo da potergli passare esattamente quell'oggetto senza crearne uno apposito. A quell'oggetto però ho aggiunto la chiave stars per il voto in forma grafica.
 
     target.append(newItem); // stampo nell'html il template compilato
 
@@ -158,7 +186,7 @@ function missingFlag() { // finito di stampare tutti i risultati della ricerca
     var target = $(this).parents(".language"); // $(this) è l'immagine che ha dato errore e ha triggerato la funzione. il parents con classe .language è il div che la contiene.
 
     var lng = target.data("lng"); // la funzione che stampa i risultati della ricerca salva nell'attributo data-lng del div la lingua del film (it per italiano, en per inglese ecc ). la vado a recuperare, la salvo nella variabile, e la sostituisco all'immagine "rotta". Sostituisco l'intero contenuto del target.
-    
+
     target.text(lng);
 
   });

@@ -53,6 +53,11 @@ header #btn-searchbar{
   padding-bottom: 15px;
 }
 
+.result-display h2{
+  padding: 20px 0;
+  text-align: center;
+}
+
 .search-results-heading{
   width: 100%;
 
@@ -62,6 +67,7 @@ header #btn-searchbar{
   font-weight: 800;
 }
 
+
 .search-results-heading>div{
   width: 25%;
   padding: 12px;
@@ -70,14 +76,14 @@ header #btn-searchbar{
   text-align: center;
 }
 
-#films-search-results li{
+#films-search-results li, #tv-search-results li{
   width: 100%;
 
   display: flex;
   justify-content: flex-start;
 }
 
-#films-search-results li>div{
+#films-search-results li>div, #tv-search-results li>div{
   width: 25%;
   padding: 12px;
   border: 1px solid black;
@@ -90,10 +96,10 @@ header #btn-searchbar{
   text-overflow: ellipsis;
 }
 
-#films-search-results li .stars{
+#films-search-results li .stars, #tv-search-results li .stars{
   color: #ccc;
 }
 
-#films-search-results li .stars .col-y{
+#films-search-results li .stars .col-y, #tv-search-results li .stars .col-y{
   color: #f1f1b1;
 }
