@@ -38,9 +38,11 @@
 $(document).ready(init);
 
 function init() {
-  addListeners(); // aggiungo listeners per la ricerca
+  addListeners();
 }
 
+
+// LISTENER SU EVENTI CHE FANNO PARTIRE LA FUNZIONE CON L'AJAX
 function addListeners() {
 
  var buttonTarget = $("#btn-searchbar");
@@ -51,7 +53,7 @@ function addListeners() {
 
    $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
 
-   sendRequest(input, "films");
+   sendRequest(input, "films"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
    sendRequest(input,"tv");
  });
 
@@ -65,7 +67,7 @@ function addListeners() {
 
      $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
 
-     sendRequest(input,"films");
+     sendRequest(input,"films"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
      sendRequest(input,"tv");
    }
 
@@ -73,9 +75,10 @@ function addListeners() {
 
 }
 
+// FUNZIONE CHE MANDA UNA RICHIESTA ALL'API
 function sendRequest(input, type) {
 
-  if(type == "films"){
+  if(type == "films"){ // cambio l'url a seconda se devo mandare una richiesta per cercare film o serie tv.
     var url = "https://api.themoviedb.org/3/search/movie"; // url dell'API di TMDB per ricerca nei film
   } else {
     var url = "https://api.themoviedb.org/3/search/tv"; // url dell'API di TMDB per ricerca nelle serietv
@@ -90,21 +93,25 @@ function sendRequest(input, type) {
       "language": "it-IT" // scelgo la lingua italiana
     },
     success: function (data, success) {
-        if (data["results"].length == 0){
+        if (data["results"].length == 0){ // se sono nel success ma l'array di risultati è vuoto significa che ho cercato ma non ho trovato niente. stampo un messaggio per l'utente
+
           $(`#${type}-search-results`).html(`<h3>Mi dispiace non abbiamo trovato risultati per questa categoria.</h3>`);
-        } else{
+
+        } else{ // se invece ci sono dei risultati li stampo nella pagina
           printSearchResults(data["results"], type); // se la API va a buon fine lancio la funzione che stampa i risultati. come argomento della funzione gli passo l'array di oggetti mandatomi dall'API
         }
 
 
     },
     error: function (err) {
+      // a prescindere dall'errore se qualcosa non va lo segnalo all'utente
       $(`#${type}-search-results`).html(`<h3>Ops! Qualcosa è andato storto. Riprova</h3>`);
     }
   });
 
 }
 
+// FUNZIONE CHE STAMPA I RISULTATI DELLA RICERCA IN PAGINA
 function printSearchResults(arrayResults, type) {
 
   var template = $("#result-template").html(); // salvo il template per handlebars in una variabile
@@ -147,18 +154,23 @@ function printSearchResults(arrayResults, type) {
       currentObj["original_title"] = currentObj["original_name"];
     }
 
+
+    var poster = `https://image.tmdb.org/t/p/w185/${currentObj["poster_path"]}`
+
+    currentObj["poster"] = poster;
+
     var newItem = compiled(currentObj); // compilo il template handlebars con i dati del film. utilizzo in handlebars le stesse chiavi utilizzate nell'oggetto arrivato dall'API in modo da potergli passare esattamente quell'oggetto senza crearne uno apposito. A quell'oggetto però ho aggiunto la chiave stars per il voto in forma grafica.
 
     target.append(newItem); // stampo nell'html il template compilato
 
   }
 
-  missingFlag();
+  missingImages();
 
 
 }
 
-
+// FUNZIONE CHE CREA UNA RAPPRESENTAZIONE GRAFICA DEI VOTI
 function getStars(obj) {
 
   var vote = obj["vote_average"]; // prendo dall'oggetto dell'API il voto in decimali
@@ -179,7 +191,8 @@ function getStars(obj) {
   return stars // la funzione ritorna una stringa che sarà una serie di "<i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>". Nell'html si vedranno 5 stelle.
 }
 
-function missingFlag() { // finito di stampare tutti i risultati della ricerca
+// FUNZIONE PER LA GESTIONE DI IMMAGINI BANDIERA MANCANTI
+function missingImages() { // finito di stampare tutti i risultati della ricerca
 
   $(".language img").on("error", function(){ // se c'è un errore nei tag selezionati (tutte le img contenute in un elemento con classe .language cioè tutte le immagini delle bandiere della lingua). si attiva la funzione. Se non trova l'immagine perchè non esiste da errore e quindi si attiva la funzione
 
@@ -190,4 +203,9 @@ function missingFlag() { // finito di stampare tutti i risultati della ricerca
     target.text(lng);
 
   });
+
+  $(".poster img").on("error", function(){
+    $(this).attr("src", "./img/imgNotFound.png")
+  });
+
 }

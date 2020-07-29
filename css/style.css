@@ -84,7 +84,7 @@ header #btn-searchbar{
 }
 
 #films-search-results li>div, #tv-search-results li>div{
-  width: 25%;
+  width: 20%;
   padding: 12px;
   border: 1px solid black;
 
@@ -94,6 +94,10 @@ header #btn-searchbar{
   white-space: nowrap;
   overflow:hidden;
   text-overflow: ellipsis;
+}
+
+#films-search-results li>div.poster img, #tv-search-results li>div.poster img{
+  max-width: 100%;
 }
 
 #films-search-results li .stars, #tv-search-results li .stars{
