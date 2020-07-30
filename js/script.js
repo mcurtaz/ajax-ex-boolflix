@@ -78,6 +78,10 @@ function addListeners() {
 // FUNZIONE CHE MANDA UNA RICHIESTA ALL'API
 function sendRequest(input, type) {
 
+  var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results.
+
+  target.text(""); // prima svuoto il target dalle ricerche precedenti
+
   if(type == "films"){ // cambio l'url a seconda se devo mandare una richiesta per cercare film o serie tv.
     var url = "https://api.themoviedb.org/3/search/movie"; // url dell'API di TMDB per ricerca nei film
   } else {
@@ -93,12 +97,17 @@ function sendRequest(input, type) {
       "language": "it-IT" // scelgo la lingua italiana
     },
     success: function (data, success) {
-        if (data["results"].length == 0){ // se sono nel success ma l'array di risultati è vuoto significa che ho cercato ma non ho trovato niente. stampo un messaggio per l'utente
+      var arrayResults = data["results"];
+        if (arrayResults.length == 0){ // se sono nel success ma l'array di risultati è vuoto significa che ho cercato ma non ho trovato niente. stampo un messaggio per l'utente
 
           $(`#${type}-search-results`).html(`<h3>Mi dispiace non abbiamo trovato risultati per questa categoria.</h3>`);
 
-        } else{ // se invece ci sono dei risultati li stampo nella pagina
-          printSearchResults(data["results"], type); // se la API va a buon fine lancio la funzione che stampa i risultati. come argomento della funzione gli passo l'array di oggetti mandatomi dall'API
+        } else{ // se invece ci sono dei risultati ciclo su film per film e mando una richiesta per sapere gli attori. questa operazione va fatta qui. ASINCRONICITÀ DELLE FUNZIONI. SE CERCO DI FARLA DOPO LA PRIMA API LANCIA FUNZIONI CON TEMPI DIVERSI E MI RITROVO A STAMPARE IN PAGINA QUANDO LA SECONDA API NON HA ANCORA FINITO. INVECE LA STAMPA PARTIRÀ SOLO QUANDO AVRÒ RICEVUTO I DATI ANCHE DA QUESTA SECONDA API.
+          for (var i = 0; i < arrayResults.length; i++) {
+
+            sendCastRequest(arrayResults[i], type);
+
+          }
         }
 
 
@@ -111,8 +120,30 @@ function sendRequest(input, type) {
 
 }
 
+// FUNZIONE CHE CON I DATI DEL FILM MANDA RICHIESTA DI UN API PER SAPERE I NOMI DEGLI ATTORI
+function sendCastRequest(obj, type){
+
+  $.ajax({
+    url:`https://api.themoviedb.org/3/movie/${obj["id"]}/credits`,
+    method: "GET",
+    data: {
+      "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
+    },
+    success: function (data) {
+      var cast = data["cast"];
+      printSearchResults(obj, cast, type);
+    },
+    error: function (err) {
+    // Spesso il cast non c'è in archivio. avendo comunque i dati del film faccio partire la funzione che stampa inizializzando l'array che contiene i nomi del cast ad undefined.
+      var cast = undefined;
+      printSearchResults(obj, cast, type);
+    }
+  });
+
+}
+
 // FUNZIONE CHE STAMPA I RISULTATI DELLA RICERCA IN PAGINA
-function printSearchResults(arrayResults, type) {
+function printSearchResults(objResult, arrayCast, type) {
 
   var template = $("#result-template").html(); // salvo il template per handlebars in una variabile
 
@@ -128,41 +159,34 @@ function printSearchResults(arrayResults, type) {
 
 
   var compiled = Handlebars.compile(template); // nella variabile compiled ci sarà un funzione di handlebars che compila il template sostituendo le chiavi con i valori corrispondenti
-  var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results. uso la variabile passata dalla funzione sendRequest
 
-  target.text(""); // prima svuoto il target dalle ricerche precedenti
+  var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results.
 
-  for (var i = 0; i < arrayResults.length; i++) { // scorro tutti i risultati e li stampo in pagina
+  var objToPrint = getObjToPrint(objResult, arrayCast, type) // a questa funzione passo tutti i dati ricevuti dalle due api. manipola i vari oggetti array e dati e mi restituisce un oggetto pronto per compilare il template di HANDLEBARS
 
-    var currentObj = arrayResults[i];
+  var objHTML = compiled(objToPrint); // compilo
 
-    objToPrint = getObjToPrint(currentObj, type);
+  target.append(objHTML); // stampo nell'HTML
 
-    var newItem = compiled(currentObj); // compilo il template handlebars con i dati del film. utilizzo in handlebars le stesse chiavi utilizzate nell'oggetto arrivato dall'API in modo da potergli passare esattamente quell'oggetto senza crearne uno apposito. A quell'oggetto però ho aggiunto la chiave stars per il voto in forma grafica.
-
-    target.append(newItem); // stampo nell'html il template compilato
-
-  }
-
-  missingImages();
+  missingImages(); // questa funzione corregge eventuali errori per immagini mancanti sostituendo con altre immagini o avvisi appositi.
 
 
 }
 
-function getObjToPrint(obj, type){
+function getObjToPrint(obj, arrayCast, type){
 
-  var stars = getStars(obj); // salvo nella variabile stars il risultato della funzione getStars passandogli come argomento l'oggetto contenete i dati del film.
-
-  obj["stars"] = stars; // creo una nuova chiave nell'oggetto che contiene i dati del film. Quindi con handlebars utilizzo una serie di chiavi che ha già per compilare titolo del film e così. in questa nuova chiave invece salvo il codice html creato dalla funzione getStars per stampare il voto in forma grafica
-
-  // ATTENZIONE: per comporre le stringhe invece di fare virgolette, apici, barra per saltare il carattere, più variabile ecc. si può utilizzare il carattere backtick (apici storti). In questo modo tra i due apici storti c'è la stringa intera a prescindere da virgolette apici singoli ecc. per metterci una variabile si uns ${variabile}. è una caratteristica di JS. non viene da librerie particolari. JS puro si chiama anche JS PLAIN o VANILLA
-
-  var languageImg = `<img src="./img/flag/flag-${obj["original_language"]}.png" alt="flag-${obj["original_language"]}">`; // creo una variabile con una riga di codice html di un immagine. la src="" è composta dall'url che trova la cartella con le bandiere. i nomi delle bandiere sono sempre flag-(lingua).png la lingua la prendo dall'oggetto mandato dall'API alla chiave original_language. quindi per ogni lingua metterò nel template di Handlebars l'immagine della barriera corrispondente. Stampati tutti i risultati la funzione missingFlag interverrà in caso di immagine bandiera mancante
+    // ----------     POSTER
 
 
-  obj["languageImg"] = languageImg;
+    var poster = `https://image.tmdb.org/t/p/w342/${obj["poster_path"]}` // creo l'url del poster. è composto da url del database immagini (https://image.tmdb.org/t/p/) + dimensione dell'immagine richiesta (w185/) + ultima parte per identificare il film/serie tv fornita dall'api nell'oggetto alla chiave "poster_path"
 
-  // alcune chiavi dell'oggetto mandato dall'API cambiano se la ricerca è per film o serie tv. nello specifico a me servono title e original_title che per le serie tv si chiamano name e original_name
+    obj["poster"] = poster; // creo un apposita chiave nell'oggetto currentObj che avrà una corrispondenza nel template di Handlebars
+
+
+
+  // TITOLO E TITOLO ORIGINALE
+
+    // alcune chiavi dell'oggetto mandato dall'API cambiano se la ricerca è per film o serie tv. nello specifico a me servono title e original_title che per le serie tv si chiamano name e original_name
 
   if(type == "tv"){
     obj["title"] = obj["name"];
@@ -170,16 +194,49 @@ function getObjToPrint(obj, type){
   }
 
 
-  var poster = `https://image.tmdb.org/t/p/w185/${obj["poster_path"]}` // creo l'url del poster. è composto da url del database immagini (https://image.tmdb.org/t/p/) + dimensione dell'immagine richiesta (w185/) + ultima parte per identificare il film/serie tv fornita dall'api nell'oggetto alla chiave "poster_path"
+  // -------   VOTO
 
-  obj["poster"] = poster; // creo un apposita chiave nell'oggetto currentObj che avrà una corrispondenza nel template di Handlebars
+  var stars = getStars(obj); // salvo nella variabile stars il risultato della funzione getStars passandogli come argomento l'oggetto contenete i dati del film.
+
+  obj["stars"] = stars; // creo una nuova chiave nell'oggetto che contiene i dati del film. Quindi con handlebars utilizzo una serie di chiavi che ha già per compilare titolo del film e così. in questa nuova chiave invece salvo il codice html creato dalla funzione getStars per stampare il voto in forma grafica
+
+  // ATTENZIONE: per comporre le stringhe invece di fare virgolette, apici, barra per saltare il carattere, più variabile ecc. si può utilizzare il carattere backtick (apici storti). In questo modo tra i due apici storti c'è la stringa intera a prescindere da virgolette apici singoli ecc. per metterci una variabile si uns ${variabile}. è una caratteristica di JS. non viene da librerie particolari. JS puro si chiama anche JS PLAIN o VANILLA
+
+  // -----------     LANGUAGE FLAG
+
+  var languageImg = `<img src="./img/flag/flag-${obj["original_language"]}.png" alt="flag-${obj["original_language"]}">`; // creo una variabile con una riga di codice html di un immagine. la src="" è composta dall'url che trova la cartella con le bandiere. i nomi delle bandiere sono sempre flag-(lingua).png la lingua la prendo dall'oggetto mandato dall'API alla chiave original_language. quindi per ogni lingua metterò nel template di Handlebars l'immagine della barriera corrispondente. Stampati tutti i risultati la funzione missingFlag interverrà in caso di immagine bandiera mancante
+
+
+  obj["languageImg"] = languageImg;
+
+
+
+
+  // ---------    TRAMA
 
   if(!obj["overview"]){ // se non è presente la trama scrivo trama non disponibile
     obj["overview"] = "Trama non disponibile."
   }
 
 
+  // --------    ATTORI
+
+  var actors = [];
+
+  if(arrayCast == [] || !arrayCast){
+    obj["actors"] = "nessun dato sul cast"
+  } else{
+    for (var i = 0; i < 5; i++) {
+      actors.push(arrayCast[i]["name"]);
+    }
+  }
+
+
+  obj["actors"] = actors;
+
+
   return obj
+
 }
 
 // FUNZIONE CHE CREA UNA RAPPRESENTAZIONE GRAFICA DEI VOTI

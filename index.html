@@ -23,16 +23,17 @@
 
   <!-- TEMPLATE HANDLEBARS -->
   <script id="result-template" type="text/x-handlebars-template">
-    <li>
+    <li data-genres="{{genre_ids}}">
       <div class="poster">
         <img src="{{poster}}" alt="Poster">
         <div class="no-img">{{ title }}</div>
         <div class="item-data-wrapper">
           <!-- &ensp; è l'entity (il carattere speciale) per lo spazio.  -->
-          <div class="title"><strong>Titolo: </strong>&ensp;{{ title }}</div>
+          <div class="title" ><strong>Titolo: </strong>&ensp;{{ title }}</div>
           <div class="original-title"><strong>Titolo originale: </strong>&ensp;{{ original_title }}</div>
           <div class="language" data-lng="{{original_language}}"><strong>Lingua: </strong>&ensp;{{{languageImg}}}</div>
           <div class="stars"><strong>Voto: </strong>&ensp;{{{stars}}}</div>
+          <div class="actors"><strong>Attori: </strong>&ensp;{{actors}}</div>
           <div class="overview"><strong>Trama: </strong>&ensp;{{{overview}}}</div>
         </div>
       </div>
