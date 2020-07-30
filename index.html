@@ -27,13 +27,13 @@
       <div class="poster">
         <img src="{{poster}}" alt="Poster">
         <div class="item-data-wrapper">
-          <div class="title">{{ title }}</div>
-          <div class="original-title">{{ original_title }}</div>
-          <div class="language" data-lng="{{original_language}}">{{{languageImg}}}</div>
-          <div class="stars">{{{stars}}}</div>
+          <div class="title"><strong>Titolo:</strong> {{ title }}</div>
+          <div class="original-title"><strong>Titolo originale:</strong> {{ original_title }}</div>
+          <div class="language" data-lng="{{original_language}}"><strong>Lingua:</strong> {{{languageImg}}}</div>
+          <div class="stars"><strong>Voto:</strong> {{{stars}}}</div>
+          <div class="overview"><strong>Trama:</strong> {{{overview}}}</div>
         </div>
       </div>
-
     </li>
   </script>
 
@@ -42,11 +42,19 @@
 <body>
 <header class="rientro">
   <div class="searchbar-container">
-    <label for="searchbar">Cerca film:</label>
-    <input id="searchbar" type="text" name="searchbar">
-    <button id="btn-searchbar" type="button" name="button"><i class="fas fa-search"></i></button>
+    <div class="logo">
+      <h1>BOOLFIX</h1>
+    </div>
+    <div class="">
+      <label for="searchbar">Cerca film:</label>
+      <input id="searchbar" type="text" name="searchbar">
+      <button id="btn-searchbar" type="button" name="button"><i class="fas fa-search"></i></button>
+    </div>
   </div>
 </header>
+<section class="filters">
+
+</section>
 <section class="result-display rientro">
   <h2>Film</h2>
   <ul id="films-search-results">

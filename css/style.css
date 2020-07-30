@@ -17,8 +17,8 @@ ul {
 }
 
 .rientro{
-  padding-left: 15%;
-  padding-right: 15%;
+  padding-left: 10%;
+  padding-right: 10%;
 }
 
 /* HEADER */
@@ -36,9 +36,12 @@ header label{
 }
 
 header #searchbar{
-  width: 25%;
+  width: 250px;
   height: 30px;
+  padding-left: 8px;
   border-radius: 8px;
+
+  font-size: 16px;
 }
 
 header #btn-searchbar{
@@ -46,7 +49,14 @@ header #btn-searchbar{
   border-radius: 5px;
 }
 
+header .searchbar-container{
+  display: flex;
+  justify-content: space-between;
+}
 
+header .searchbar-container h1{
+  color: darkred;
+}
 /* SEZIONE RISULTATI RICERCA */
 
 .result-display{
@@ -67,9 +77,13 @@ header #btn-searchbar{
   flex-wrap: wrap;
 }
 
+
+/* CARD FILM/SERIE TV */
+
 #films-search-results li, #tv-search-results li{
-  width: 20%;
+  width: 25%;
   max-width: 342px;
+  min-width: 180px;
 
   padding: 12px;
 
@@ -77,7 +91,7 @@ header #btn-searchbar{
   font-size: 15px;
   text-align: center;
 
-  overflow:auto;
+  overflow:hidden;
 
 }
 
@@ -96,6 +110,8 @@ header #btn-searchbar{
 #films-search-results li .item-data-wrapper, #tv-search-results li .item-data-wrapper{
   width: 100%;
   height: 100%;
+  padding: 10px;
+
 
   position: absolute;
   top: 0;
@@ -108,14 +124,50 @@ header #btn-searchbar{
   background-color: rgba(0, 0, 0, 0.8);
 }
 
+
+
 #films-search-results li:hover .item-data-wrapper, #tv-search-results li:hover .item-data-wrapper{
   display: block;
 }
 
-#films-search-results li .stars, #tv-search-results li .stars{
+#films-search-results li .title, #tv-search-results li .title,
+#films-search-results li .original-title, #tv-search-results li .original-title,
+#films-search-results li .language, #tv-search-results li .language,
+#films-search-results li .stars, #tv-search-results li .stars,
+#films-search-results li .overview, #tv-search-results li .overview
+{
+
+  height: 30px;
+  font-size: 14px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: white;
+}
+
+#films-search-results li .language img, #tv-search-results li .language img{
+  width: 30px;
+  vertical-align: middle;
+}
+
+#films-search-results li .stars i, #tv-search-results li .stars i{
   color: #ccc;
 }
 
-#films-search-results li .stars .col-y, #tv-search-results li .stars .col-y{
-  color: #f1f1b1;
+#films-search-results li .stars i.col-y, #tv-search-results li .stars i.col-y{
+  color: yellow;
+}
+
+#films-search-results li .overview, #tv-search-results li .overview{
+  position:relative;
+
+  height:calc(100% - 120px);
+  padding-right: 0.5em;
+
+
+  white-space: normal;
+  /* le ellipsis funzionano soltanto con white-space: nowrap. Per mettere le ellipsis su un testo di più righe servirebbe un plugin di jquery o comunque utilizzare il js. la soluzione più comoda è la barra che di scorrimento e via. o altrimenti fare una riga soltano e nowrap e ellipsis */
+  overflow: auto;
 }
