@@ -136,28 +136,7 @@ function printSearchResults(arrayResults, type) {
 
     var currentObj = arrayResults[i];
 
-    var stars = getStars(currentObj); // salvo nella variabile stars il risultato della funzione getStars passandogli come argomento l'oggetto contenete i dati del film.
-
-    currentObj["stars"] = stars; // creo una nuova chiave nell'oggetto che contiene i dati del film. Quindi con handlebars utilizzo una serie di chiavi che ha già per compilare titolo del film e così. in questa nuova chiave invece salvo il codice html creato dalla funzione getStars per stampare il voto in forma grafica
-
-    // ATTENZIONE: per comporre le stringhe invece di fare virgolette, apici, barra per saltare il carattere, più variabile ecc. si può utilizzare il carattere backtick (apici storti). In questo modo tra i due apici storti c'è la stringa intera a prescindere da virgolette apici singoli ecc. per metterci una variabile si uns ${variabile}. è una caratteristica di JS. non viene da librerie particolari. JS puro si chiama anche JS PLAIN o VANILLA
-
-    var languageImg = `<img src="./img/flag/flag-${currentObj["original_language"]}.png" alt="flag-${currentObj["original_language"]}">`; // creo una variabile con una riga di codice html di un immagine. la src="" è composta dall'url che trova la cartella con le bandiere. i nomi delle bandiere sono sempre flag-(lingua).png la lingua la prendo dall'oggetto mandato dall'API alla chiave original_language. quindi per ogni lingua metterò nel template di Handlebars l'immagine della barriera corrispondente. Stampati tutti i risultati la funzione missingFlag interverrà in caso di immagine bandiera mancante
-
-
-    currentObj["languageImg"] = languageImg;
-
-    // alcune chiavi dell'oggetto mandato dall'API cambiano se la ricerca è per film o serie tv. nello specifico a me servono title e original_title che per le serie tv si chiamano name e original_name
-
-    if(type == "tv"){
-      currentObj["title"] = currentObj["name"];
-      currentObj["original_title"] = currentObj["original_name"];
-    }
-
-
-    var poster = `https://image.tmdb.org/t/p/w185/${currentObj["poster_path"]}` // creo l'url del poster. è composto da url del database immagini (https://image.tmdb.org/t/p/) + dimensione dell'immagine richiesta (w185/) + ultima parte per identificare il film/serie tv fornita dall'api nell'oggetto alla chiave "poster_path"
-
-    currentObj["poster"] = poster; // creo un apposita chiave nell'oggetto currentObj che avrà una corrispondenza nel template di Handlebars
+    objToPrint = getObjToPrint(currentObj, type);
 
     var newItem = compiled(currentObj); // compilo il template handlebars con i dati del film. utilizzo in handlebars le stesse chiavi utilizzate nell'oggetto arrivato dall'API in modo da potergli passare esattamente quell'oggetto senza crearne uno apposito. A quell'oggetto però ho aggiunto la chiave stars per il voto in forma grafica.
 
@@ -168,6 +147,39 @@ function printSearchResults(arrayResults, type) {
   missingImages();
 
 
+}
+
+function getObjToPrint(obj, type){
+
+  var stars = getStars(obj); // salvo nella variabile stars il risultato della funzione getStars passandogli come argomento l'oggetto contenete i dati del film.
+
+  obj["stars"] = stars; // creo una nuova chiave nell'oggetto che contiene i dati del film. Quindi con handlebars utilizzo una serie di chiavi che ha già per compilare titolo del film e così. in questa nuova chiave invece salvo il codice html creato dalla funzione getStars per stampare il voto in forma grafica
+
+  // ATTENZIONE: per comporre le stringhe invece di fare virgolette, apici, barra per saltare il carattere, più variabile ecc. si può utilizzare il carattere backtick (apici storti). In questo modo tra i due apici storti c'è la stringa intera a prescindere da virgolette apici singoli ecc. per metterci una variabile si uns ${variabile}. è una caratteristica di JS. non viene da librerie particolari. JS puro si chiama anche JS PLAIN o VANILLA
+
+  var languageImg = `<img src="./img/flag/flag-${obj["original_language"]}.png" alt="flag-${obj["original_language"]}">`; // creo una variabile con una riga di codice html di un immagine. la src="" è composta dall'url che trova la cartella con le bandiere. i nomi delle bandiere sono sempre flag-(lingua).png la lingua la prendo dall'oggetto mandato dall'API alla chiave original_language. quindi per ogni lingua metterò nel template di Handlebars l'immagine della barriera corrispondente. Stampati tutti i risultati la funzione missingFlag interverrà in caso di immagine bandiera mancante
+
+
+  obj["languageImg"] = languageImg;
+
+  // alcune chiavi dell'oggetto mandato dall'API cambiano se la ricerca è per film o serie tv. nello specifico a me servono title e original_title che per le serie tv si chiamano name e original_name
+
+  if(type == "tv"){
+    obj["title"] = obj["name"];
+    obj["original_title"] = obj["original_name"];
+  }
+
+
+  var poster = `https://image.tmdb.org/t/p/w185/${obj["poster_path"]}` // creo l'url del poster. è composto da url del database immagini (https://image.tmdb.org/t/p/) + dimensione dell'immagine richiesta (w185/) + ultima parte per identificare il film/serie tv fornita dall'api nell'oggetto alla chiave "poster_path"
+
+  obj["poster"] = poster; // creo un apposita chiave nell'oggetto currentObj che avrà una corrispondenza nel template di Handlebars
+
+  if(!obj["overview"]){ // se non è presente la trama scrivo trama non disponibile
+    obj["overview"] = "Trama non disponibile."
+  }
+
+
+  return obj
 }
 
 // FUNZIONE CHE CREA UNA RAPPRESENTAZIONE GRAFICA DEI VOTI
@@ -208,8 +220,9 @@ function missingImages() { // finito di stampare tutti i risultati della ricerca
   // POSTER MANCANTI
   // questo si potrebbe risolvere anche con un if messo a monte: se manca l'url dell'immagine nell'oggetto restituito dall'api (currentObj["poster_path"] = null) allora currentObj["poster"] = "./img/imgNotFound.png" altrimenti
   // altra soluzione ancora: si può utilizzare if anche direttamente in handlebars {#if currentObj["poster_path"]} {{ url }} {/if} {else} {{url}} {/else}
-  $(".poster img").on("error", function(){ // se c'è un errore nellímmagine nel div con classe "poster" che sono le immagini appunto dei poster a quell'immagine do attributo src l'url della classica immagine "Image Not Found"
-    $(this).attr("src", "./img/imgNotFound.png")
+  $(".poster>img").on("error", function(){ // se c'è un errore nellímmagine nel div con classe "poster" che sono le immagini appunto dei poster a quell'immagine do attributo src l'url della classica immagine "Image Not Found"
+    $(this).attr("src", "./img/imgNotFound.png");
+    $(this).siblings(".no-img").css("display", "block");
   });
 
 }

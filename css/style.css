@@ -124,6 +124,18 @@ header .searchbar-container h1{
   background-color: rgba(0, 0, 0, 0.8);
 }
 
+/* in caso di immagine mancante mostro almeno il titolo */
+#films-search-results li .no-img, #tv-search-results li .no-img{
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-size: 22px;
+  font-weight: bolder;
+  color: darkred;
+}
 
 
 #films-search-results li:hover .item-data-wrapper, #tv-search-results li:hover .item-data-wrapper{
@@ -138,7 +150,7 @@ header .searchbar-container h1{
 {
 
   height: 30px;
-  font-size: 14px;
+  font-size: 15px;
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -161,13 +173,9 @@ header .searchbar-container h1{
 }
 
 #films-search-results li .overview, #tv-search-results li .overview{
-  position:relative;
-
   height:calc(100% - 120px);
-  padding-right: 0.5em;
 
-
-  white-space: normal;
   /* le ellipsis funzionano soltanto con white-space: nowrap. Per mettere le ellipsis su un testo di più righe servirebbe un plugin di jquery o comunque utilizzare il js. la soluzione più comoda è la barra che di scorrimento e via. o altrimenti fare una riga soltano e nowrap e ellipsis */
+  white-space: normal;
   overflow: auto;
 }
