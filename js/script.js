@@ -155,9 +155,9 @@ function printSearchResults(arrayResults, type) {
     }
 
 
-    var poster = `https://image.tmdb.org/t/p/w185/${currentObj["poster_path"]}`
+    var poster = `https://image.tmdb.org/t/p/w185/${currentObj["poster_path"]}` // creo l'url del poster. è composto da url del database immagini (https://image.tmdb.org/t/p/) + dimensione dell'immagine richiesta (w185/) + ultima parte per identificare il film/serie tv fornita dall'api nell'oggetto alla chiave "poster_path"
 
-    currentObj["poster"] = poster;
+    currentObj["poster"] = poster; // creo un apposita chiave nell'oggetto currentObj che avrà una corrispondenza nel template di Handlebars
 
     var newItem = compiled(currentObj); // compilo il template handlebars con i dati del film. utilizzo in handlebars le stesse chiavi utilizzate nell'oggetto arrivato dall'API in modo da potergli passare esattamente quell'oggetto senza crearne uno apposito. A quell'oggetto però ho aggiunto la chiave stars per il voto in forma grafica.
 
@@ -191,9 +191,10 @@ function getStars(obj) {
   return stars // la funzione ritorna una stringa che sarà una serie di "<i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>". Nell'html si vedranno 5 stelle.
 }
 
-// FUNZIONE PER LA GESTIONE DI IMMAGINI BANDIERA MANCANTI
+// FUNZIONE PER LA GESTIONE DI IMMAGINI MANCANTI
 function missingImages() { // finito di stampare tutti i risultati della ricerca
 
+  //BANDIERE MANCANTI
   $(".language img").on("error", function(){ // se c'è un errore nei tag selezionati (tutte le img contenute in un elemento con classe .language cioè tutte le immagini delle bandiere della lingua). si attiva la funzione. Se non trova l'immagine perchè non esiste da errore e quindi si attiva la funzione
 
     var target = $(this).parents(".language"); // $(this) è l'immagine che ha dato errore e ha triggerato la funzione. il parents con classe .language è il div che la contiene.
@@ -204,7 +205,10 @@ function missingImages() { // finito di stampare tutti i risultati della ricerca
 
   });
 
-  $(".poster img").on("error", function(){
+  // POSTER MANCANTI
+  // questo si potrebbe risolvere anche con un if messo a monte: se manca l'url dell'immagine nell'oggetto restituito dall'api (currentObj["poster_path"] = null) allora currentObj["poster"] = "./img/imgNotFound.png" altrimenti
+  // altra soluzione ancora: si può utilizzare if anche direttamente in handlebars {#if currentObj["poster_path"]} {{ url }} {/if} {else} {{url}} {/else}
+  $(".poster img").on("error", function(){ // se c'è un errore nellímmagine nel div con classe "poster" che sono le immagini appunto dei poster a quell'immagine do attributo src l'url della classica immagine "Image Not Found"
     $(this).attr("src", "./img/imgNotFound.png")
   });
 

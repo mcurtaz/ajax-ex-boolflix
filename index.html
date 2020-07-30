@@ -24,11 +24,16 @@
   <!-- TEMPLATE HANDLEBARS -->
   <script id="result-template" type="text/x-handlebars-template">
     <li>
-      <div class="poster"><img src="{{poster}}" alt="Poster"></div>
-      <div class="title">{{ title }}</div>
-      <div class="original-title">{{ original_title }}</div>
-      <div class="language" data-lng="{{original_language}}">{{{languageImg}}}</div>
-      <div class="stars">{{{stars}}}</div>
+      <div class="poster">
+        <img src="{{poster}}" alt="Poster">
+        <div class="item-data-wrapper">
+          <div class="title">{{ title }}</div>
+          <div class="original-title">{{ original_title }}</div>
+          <div class="language" data-lng="{{original_language}}">{{{languageImg}}}</div>
+          <div class="stars">{{{stars}}}</div>
+        </div>
+      </div>
+
     </li>
   </script>
 
@@ -44,22 +49,9 @@
 </header>
 <section class="result-display rientro">
   <h2>Film</h2>
-  <div class="search-results-heading">
-    <div>Poster</div>
-    <div>Titolo</div>
-    <div>Titolo originale</div>
-    <div>Lingua originale</div>
-    <div>Voto</div>
-  </div>
-  <ul id="films-search-results"></ul>
+  <ul id="films-search-results">
+  </ul>
   <h2>Serie TV</h2>
-  <div class="search-results-heading">
-    <div>Poster</div>
-    <div>Titolo</div>
-    <div>Titolo originale</div>
-    <div>Lingua originale</div>
-    <div>Voto</div>
-  </div>
   <ul id="tv-search-results"></ul>
 </section>
 </body>

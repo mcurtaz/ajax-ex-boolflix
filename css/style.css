@@ -8,7 +8,8 @@
 
 body{
   font-family: "lato", sans-serif;
-  background-color: #f1f1f1;
+  background-color: #000;
+  color: #fff;
 }
 
 ul {
@@ -58,46 +59,57 @@ header #btn-searchbar{
   text-align: center;
 }
 
-.search-results-heading{
+#films-search-results, #tv-search-results{
   width: 100%;
 
   display: flex;
   justify-content: flex-start;
-  font-size: 22px;
-  font-weight: 800;
-}
-
-
-.search-results-heading>div{
-  width: 25%;
-  padding: 12px;
-  border: 1px solid black;
-
-  text-align: center;
+  flex-wrap: wrap;
 }
 
 #films-search-results li, #tv-search-results li{
-  width: 100%;
-
-  display: flex;
-  justify-content: flex-start;
-}
-
-#films-search-results li>div, #tv-search-results li>div{
   width: 20%;
+  max-width: 342px;
+
   padding: 12px;
-  border: 1px solid black;
+
 
   font-size: 15px;
   text-align: center;
 
-  white-space: nowrap;
-  overflow:hidden;
-  text-overflow: ellipsis;
+  overflow:auto;
+
 }
 
-#films-search-results li>div.poster img, #tv-search-results li>div.poster img{
-  max-width: 100%;
+#films-search-results li>div.poster, #tv-search-results li>div.poster{
+  width: 100%;
+  height: 100%;
+
+  position: relative;
+
+}
+
+#films-search-results li>div.poster>img, #tv-search-results li>div.poster>img{
+  width: 100%;
+}
+
+#films-search-results li .item-data-wrapper, #tv-search-results li .item-data-wrapper{
+  width: 100%;
+  height: 100%;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  z-index: 900;
+
+  display: none;
+
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+#films-search-results li:hover .item-data-wrapper, #tv-search-results li:hover .item-data-wrapper{
+  display: block;
 }
 
 #films-search-results li .stars, #tv-search-results li .stars{
