@@ -39,7 +39,7 @@ $(document).ready(init);
 
 function init() {
   printGenresSelect();
-  addListeners();
+  addSearchListeners();
   addFilterGenresListener()
 }
 
@@ -72,7 +72,7 @@ function printGenresSelect(){
 }
 
 // LISTENER SU EVENTI CHE FANNO PARTIRE LA FUNZIONE CON L'AJAX
-function addListeners() {
+function addSearchListeners() {
 
  var buttonTarget = $("#btn-searchbar");
 
@@ -340,32 +340,33 @@ function addFilterGenresListener() {
 
 function filterGenres(selectedGenre){
 
+  //  due diversi target per movie e serie tv. il genere selezionato viene passato come argomento. i generi sono sotto forma di id identificativo. se sono più generi nel data-genres trovo una stringa del tipo 99,880,25 se però è un genere solo nel data-genres troverò un numero
   var movieTarget = $("#movie-search-results li");
 
   var tvTarget = $("#tv-search-results li");
 
-  if (selectedGenre == "all"){
+  if (selectedGenre == "all"){ // se ho selezionato all mostro tutte le card
 
     movieTarget.show();
     tvTarget.show();
 
   } else {
-
+    // se ho selezionato un genere in partenza vado a nascondere tutte le card poi troverò quelle quelle corrispondenti al genere selezionato e mostrerò solo quelle
     movieTarget.hide();
 
     tvTarget.hide();
 
-    movieTarget.each(function(){
+    movieTarget.each(function(){ // scorro tutti gli elementi li dei film (le mie card di film)
 
-      var targetGenresIds = $(this).data("genres");
+      var targetGenresIds = $(this).data("genres"); // per ognuno prendo i generi
 
-      if(isNaN(targetGenresIds) && targetGenresIds.includes(selectedGenre)){
+      if(isNaN(targetGenresIds) && targetGenresIds.includes(selectedGenre)){ // se non è un numero e quindi è una stringa di generi utilizzo includes() per trovare le corrispondenze e mostrare le card
 
         $(this).show();
 
       }
 
-      if (!isNaN(targetGenresIds) && targetGenresIds == selectedGenre){
+      if (!isNaN(targetGenresIds) && targetGenresIds == selectedGenre){ // se il genere è uno solo e quindi data-genres è un numero e non una stringa non posso utilizzare includes() che funziona solo con le stringhe perciò utilizzo semplicemento un ==
 
         $(this).show();
 
@@ -373,7 +374,7 @@ function filterGenres(selectedGenre){
 
     });
 
-    tvTarget.each(function(){
+    tvTarget.each(function(){ // ripeto le stesse operazioni per le card delle serie tv
 
       var targetGenresIds = $(this).data("genres");
 
