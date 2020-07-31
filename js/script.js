@@ -40,11 +40,11 @@ $(document).ready(init);
 function init() {
   printGenresSelect();
   addListeners();
+  addFilterGenresListener()
 }
 
 // FUNZIONE CHE CHIEDE ALL'API I GENERI DISPONIBILI E STAMPA LA SELECT
 function printGenresSelect(){
-
 
   $.ajax({
     url: "https://api.themoviedb.org/3/genre/movie/list",
@@ -62,11 +62,13 @@ function printGenresSelect(){
         target.append(optionHTML);
       }
 
+
     },
     error: function(err){
       console.log("err", err);
     }
   });
+
 }
 
 // LISTENER SU EVENTI CHE FANNO PARTIRE LA FUNZIONE CON L'AJAX
@@ -80,21 +82,25 @@ function addListeners() {
 
    $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
 
-   sendRequest(input, "films"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
-   sendRequest(input,"tv");
+   if (input != "") {
+     sendRequest(input, "movie"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
+     sendRequest(input,"tv");
+   }
+
  });
 
  var keyupTarget = $("#searchbar");
 
  keyupTarget.keyup(function(event){ // listener del keyup sull'input "searchbar". Ascolta la pressione dei tasti sulla tastiera quando il focus è sulla barra di ricerca (la barra di ricerca è "selezionata")
 
-   if(event.which == 13){ // se si preme invio lancio la funzione send request
+   var input = $("#searchbar").val();
 
-     var input = $("#searchbar").val(); // prendo la stringa nell'input scritta dall'utente
+
+   if(event.which == 13 && input){ // se si preme invio e input esiste (input != "") lancio la funzione send request
 
      $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
 
-     sendRequest(input,"films"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
+     sendRequest(input,"movie"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
      sendRequest(input,"tv");
    }
 
@@ -109,7 +115,7 @@ function sendRequest(input, type) {
 
   target.text(""); // prima svuoto il target dalle ricerche precedenti
 
-  if(type == "films"){ // cambio l'url a seconda se devo mandare una richiesta per cercare film o serie tv.
+  if(type == "movie"){ // cambio l'url a seconda se devo mandare una richiesta per cercare film o serie tv.
     var url = "https://api.themoviedb.org/3/search/movie"; // url dell'API di TMDB per ricerca nei film
   } else {
     var url = "https://api.themoviedb.org/3/search/tv"; // url dell'API di TMDB per ricerca nelle serietv
@@ -130,6 +136,8 @@ function sendRequest(input, type) {
           $(`#${type}-search-results`).html(`<h3>Mi dispiace non abbiamo trovato risultati per questa categoria.</h3>`);
 
         } else{ // se invece ci sono dei risultati ciclo su film per film e mando una richiesta per sapere gli attori. questa operazione va fatta qui. ASINCRONICITÀ DELLE FUNZIONI. SE CERCO DI FARLA DOPO LA PRIMA API LANCIA FUNZIONI CON TEMPI DIVERSI E MI RITROVO A STAMPARE IN PAGINA QUANDO LA SECONDA API NON HA ANCORA FINITO. INVECE LA STAMPA PARTIRÀ SOLO QUANDO AVRÒ RICEVUTO I DATI ANCHE DA QUESTA SECONDA API.
+
+        // POSSIBILE SOLUZIONE DUE: DENTRO QUESTO FOR COMINCIO A STAMPARE IL TEMPLATE HANDLEBAR. STAMPO ANCHE L'ID DEL FILM NEL TEMPLATE IN UN DATA-ID POI ALLA FINE DEL FOR LANCIO UNA FUNZIONE CHE MANDA LA RICHIESTA ALL'API PER IL CAST PARTENDO DALL'ID DELL'OGGETTO arrayResult[i] SU CUI STO CICLANDO. POI PER APPENDERLO CERCO NELL'HTML IL DATA-ID CHE SICURAMENTE SARÀ GIÀ NELL'HTML PERCHÈ QUANDO HO LA RISPOSTA DEL PRIMO AJAX LA STAMPA È PRATICAMENTE IMMEDIATA NEL FOR, POI LANCIO IL SECONDO AJAX E QUANDO MI RISPONDE SICURAMENTE IL FOR CHE STAMPA QUELL'ID LÌ È GIÀ CONCLUSO. QUESTA SECONDA SOLUZIONE MI EVITA ANCHE DI LANCIARE LA FUNZIONE PRINT SEARCH RESULT NELL'ERROR DELLA CHIAMATA PER IL CAST (CHE STAMPA LA CARD DEL FILM/SERIETV ANCHE SE IL CAST RISULTA 404 PAGE NOT FOUND COSA CHE SUCCEDE SPESSO COI FILM MINORI)
           for (var i = 0; i < arrayResults.length; i++) {
 
             sendCastRequest(arrayResults[i], type);
@@ -149,9 +157,11 @@ function sendRequest(input, type) {
 
 // FUNZIONE CHE CON I DATI DEL FILM MANDA RICHIESTA DI UN API PER SAPERE I NOMI DEGLI ATTORI
 function sendCastRequest(obj, type){
+  // gli id sono univoci per categoria: film o serietv. servono due chiamate diverse.
+
 
   $.ajax({
-    url:`https://api.themoviedb.org/3/movie/${obj["id"]}/credits`,
+    url:`https://api.themoviedb.org/3/${type}/${obj["id"]}/credits`,
     method: "GET",
     data: {
       "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
@@ -200,6 +210,7 @@ function printSearchResults(objResult, arrayCast, type) {
 
 }
 
+// FUNZIONE CHE CREA L'OGGETTO DA STAMPARE
 function getObjToPrint(obj, arrayCast, type){
 
     // ----------     POSTER
@@ -243,6 +254,10 @@ function getObjToPrint(obj, arrayCast, type){
 
   if(!obj["overview"]){ // se non è presente la trama scrivo trama non disponibile
     obj["overview"] = "Trama non disponibile."
+  } else {
+    if (obj["overview"].length > 250) { // se la trama è più lunga di 250 caratteri prendo solo i primi 250 e aggiungo "..." è tipo un text overflow fatto con js
+      obj["overview"] = obj["overview"].substring(0, 250) + "...";
+    }
   }
 
 
@@ -250,11 +265,11 @@ function getObjToPrint(obj, arrayCast, type){
 
   var actors = [];
 
-  if(arrayCast == [] || !arrayCast){
+  if(arrayCast == [] || arrayCast == undefined){
     obj["actors"] = "nessun dato sul cast"
   } else{
-    for (var i = 0; i < 5; i++) {
-      actors.push(arrayCast[i]["name"]);
+    for (var i = 0; i < 5 && i < arrayCast.length; i++) {
+      actors.push(arrayCast[i]["name"] + " ");
     }
   }
 
@@ -308,5 +323,74 @@ function missingImages() { // finito di stampare tutti i risultati della ricerca
     $(this).attr("src", "./img/imgNotFound.png");
     $(this).siblings(".no-img").css("display", "block");
   });
+
+}
+
+// FUNZIONE CHE FILTRA LE CARD DA VISUALIZZARE IN BASE AL GENERE
+
+function addFilterGenresListener() {
+  $("#genre-select").change(function(){
+
+    var selectedGenre = $(this).val();
+
+    filterGenres(selectedGenre);
+
+  });
+}
+
+function filterGenres(selectedGenre){
+
+  var movieTarget = $("#movie-search-results li");
+
+  var tvTarget = $("#tv-search-results li");
+
+  if (selectedGenre == "all"){
+
+    movieTarget.show();
+    tvTarget.show();
+
+  } else {
+
+    movieTarget.hide();
+
+    tvTarget.hide();
+
+    movieTarget.each(function(){
+
+      var targetGenresIds = $(this).data("genres");
+
+      if(isNaN(targetGenresIds) && targetGenresIds.includes(selectedGenre)){
+
+        $(this).show();
+
+      }
+
+      if (!isNaN(targetGenresIds) && targetGenresIds == selectedGenre){
+
+        $(this).show();
+
+      }
+
+    });
+
+    tvTarget.each(function(){
+
+      var targetGenresIds = $(this).data("genres");
+
+      if(isNaN(targetGenresIds) && targetGenresIds.includes(selectedGenre)){
+
+        $(this).show();
+
+      }
+
+      if (!isNaN(targetGenresIds) && targetGenresIds == selectedGenre){
+
+        $(this).show();
+
+      }
+
+    });
+  }
+
 
 }

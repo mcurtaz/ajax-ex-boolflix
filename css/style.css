@@ -100,7 +100,7 @@ header .searchbar-container h1{
   text-align: center;
 }
 
-#films-search-results, #tv-search-results{
+#movie-search-results, #tv-search-results{
   width: 100%;
 
   display: flex;
@@ -111,7 +111,7 @@ header .searchbar-container h1{
 
 /* CARD FILM/SERIE TV */
 
-#films-search-results li, #tv-search-results li{
+#movie-search-results li, #tv-search-results li{
   width: 25%;
   max-width: 342px;
   min-width: 180px;
@@ -126,7 +126,7 @@ header .searchbar-container h1{
 
 }
 
-#films-search-results li>div.poster, #tv-search-results li>div.poster{
+#movie-search-results li>div.poster, #tv-search-results li>div.poster{
   width: 100%;
   height: 100%;
 
@@ -134,11 +134,11 @@ header .searchbar-container h1{
 
 }
 
-#films-search-results li>div.poster>img, #tv-search-results li>div.poster>img{
+#movie-search-results li>div.poster>img, #tv-search-results li>div.poster>img{
   width: 100%;
 }
 
-#films-search-results li .item-data-wrapper, #tv-search-results li .item-data-wrapper{
+#movie-search-results li .item-data-wrapper, #tv-search-results li .item-data-wrapper{
   width: 100%;
   height: 100%;
   padding: 10px;
@@ -156,7 +156,7 @@ header .searchbar-container h1{
 }
 
 /* in caso di immagine mancante mostro almeno il titolo */
-#films-search-results li .no-img, #tv-search-results li .no-img{
+#movie-search-results li .no-img, #tv-search-results li .no-img{
   display: none;
   position: absolute;
   top: 50%;
@@ -169,15 +169,15 @@ header .searchbar-container h1{
 }
 
 
-#films-search-results li:hover .item-data-wrapper, #tv-search-results li:hover .item-data-wrapper{
+#movie-search-results li:hover .item-data-wrapper, #tv-search-results li:hover .item-data-wrapper{
   display: block;
 }
 
-#films-search-results li .title, #tv-search-results li .title,
-#films-search-results li .original-title, #tv-search-results li .original-title,
-#films-search-results li .language, #tv-search-results li .language,
-#films-search-results li .stars, #tv-search-results li .stars,
-#films-search-results li .overview, #tv-search-results li .overview
+#movie-search-results li .title, #tv-search-results li .title,
+#movie-search-results li .original-title, #tv-search-results li .original-title,
+#movie-search-results li .language, #tv-search-results li .language,
+#movie-search-results li .stars, #tv-search-results li .stars,
+#movie-search-results li .overview, #tv-search-results li .overview
 {
 
   height: 30px;
@@ -190,20 +190,20 @@ header .searchbar-container h1{
   color: white;
 }
 
-#films-search-results li .language img, #tv-search-results li .language img{
+#movie-search-results li .language img, #tv-search-results li .language img{
   width: 30px;
   vertical-align: middle;
 }
 
-#films-search-results li .stars i, #tv-search-results li .stars i{
+#movie-search-results li .stars i, #tv-search-results li .stars i{
   color: #ccc;
 }
 
-#films-search-results li .stars i.col-y, #tv-search-results li .stars i.col-y{
+#movie-search-results li .stars i.col-y, #tv-search-results li .stars i.col-y{
   color: yellow;
 }
 
-#films-search-results li .overview, #tv-search-results li .overview{
+#movie-search-results li .overview, #tv-search-results li .overview{
   height:calc(100% - 120px);
 
   /* le ellipsis funzionano soltanto con white-space: nowrap. Per mettere le ellipsis su un testo di più righe servirebbe un plugin di jquery o comunque utilizzare il js. la soluzione più comoda è la barra che di scorrimento e via. o altrimenti fare una riga soltano e nowrap e ellipsis */
