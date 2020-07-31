@@ -38,9 +38,36 @@
 $(document).ready(init);
 
 function init() {
+  printGenresSelect();
   addListeners();
 }
 
+// FUNZIONE CHE CHIEDE ALL'API I GENERI DISPONIBILI E STAMPA LA SELECT
+function printGenresSelect(){
+
+
+  $.ajax({
+    url: "https://api.themoviedb.org/3/genre/movie/list",
+    method: "GET",
+    data: {
+      "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
+      "language": "it-IT" // scelgo la lingua italiana
+    },
+    success: function (data){
+      var genres = data["genres"];
+      var target = $("#genre-select");
+
+      for (var i = 0; i < genres.length; i++) {
+        optionHTML = `<option value="${genres[i]["id"]}" >${genres[i]["name"]}</option>`;
+        target.append(optionHTML);
+      }
+
+    },
+    error: function(err){
+      console.log("err", err);
+    }
+  });
+}
 
 // LISTENER SU EVENTI CHE FANNO PARTIRE LA FUNZIONE CON L'AJAX
 function addListeners() {

@@ -57,6 +57,37 @@ header .searchbar-container{
 header .searchbar-container h1{
   color: darkred;
 }
+
+/* SEZIONE FILTRI */
+
+#filters{
+  display: flex;
+  justify-content: flex-start;
+
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+#filters .title{
+  width: 30%;
+}
+
+#filters #genre-select{
+  min-width: 200px;
+  font-size: 16px;
+  padding: 5px;
+}
+
+#filters .genres label{
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+#filters #genre-select option{
+  font-size: 16px;
+}
+
+
 /* SEZIONE RISULTATI RICERCA */
 
 .result-display{
