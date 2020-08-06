@@ -265,18 +265,22 @@ function getObjToPrint(obj, arrayCast, type){
 
   var actors = [];
 
-  if(arrayCast == [] || arrayCast == undefined){
-    obj["actors"] = "nessun dato sul cast"
+  if(arrayCast.length == 0 || arrayCast == undefined){ // ATTENZIONE: pre mettere nelle condizioni array vuoto conviene usare array.length perchè un array vuoto in booleano è true. (non come le stringhe che in booleano danno false)
+    actors = "nessun dato sul cast"
   } else{
     for (var i = 0; i < 5 && i < arrayCast.length; i++) {
-      actors.push(arrayCast[i]["name"] + " ");
+      actors.push(" " + arrayCast[i]["name"]);
     }
   }
-
 
   obj["actors"] = actors;
 
 
+  // --------  GENERI
+
+  var genres = getGenresNames(obj);
+
+  obj["genres"] = genres;
   return obj
 
 }
@@ -300,6 +304,30 @@ function getStars(obj) {
   }
 
   return stars // la funzione ritorna una stringa che sarà una serie di "<i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>". Nell'html si vedranno 5 stelle.
+}
+
+// FUNZIONE CHE CREA LA LISTA DI GENERI
+function getGenresNames(obj){
+
+  var ids = obj["genre_ids"]; // per ogni film/serie prendo la lista di ids
+  var genres = [];
+
+  if (ids.length == 0){ // ATTENZIONE: per mettere nelle condizioni array vuoto conviene usare array.length perchè un array vuoto in booleano è true. (non come le stringhe che in booleano danno false)
+
+    genres = "Nessun genere trovato";
+
+  } else {
+
+    for (var i = 0; i < ids.length; i++) { // se è presente una lista di ids ciclo sulla lista. Nella select dei generi ho delle option con id del genre nel value e nome corrispondente nel testo della option. Userò quelle
+      var listGenreId = $(`#genre-select option[value="${ids[i]}"]`); // seleziono la option con l'ID corrispondente a un id della lista id dei generi del film in oggetto
+
+      var listGenreName = listGenreId.text(); // prendo il text di quella option
+
+      genres.push(" " + listGenreName); // lo pusho in un array dei generi con uno spazio per separarli. La virgola tra uno e l'altro la stampa in automatico quando stampi un array.
+    }
+  }
+
+  return genres // la funzione ritorna la lista di generi
 }
 
 // FUNZIONE PER LA GESTIONE DI IMMAGINI MANCANTI
@@ -326,8 +354,7 @@ function missingImages() { // finito di stampare tutti i risultati della ricerca
 
 }
 
-// FUNZIONE CHE FILTRA LE CARD DA VISUALIZZARE IN BASE AL GENERE
-
+// FUNZIONE CHE AGGIUNGE UN LISTENER ALLA SELECT CHE FILTRA PER GENERE
 function addFilterGenresListener() {
   $("#genre-select").change(function(){
 
@@ -338,6 +365,7 @@ function addFilterGenresListener() {
   });
 }
 
+// FUNZIONE CHE FILTRA LE CARD DA VISUALIZZARE IN BASE AL GENERE
 function filterGenres(selectedGenre){
 
   //  due diversi target per movie e serie tv. il genere selezionato viene passato come argomento. i generi sono sotto forma di id identificativo. se sono più generi nel data-genres trovo una stringa del tipo 99,880,25 se però è un genere solo nel data-genres troverò un numero

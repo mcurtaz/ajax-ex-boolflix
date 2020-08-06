@@ -177,7 +177,8 @@ header .searchbar-container h1{
 #movie-search-results li .original-title, #tv-search-results li .original-title,
 #movie-search-results li .language, #tv-search-results li .language,
 #movie-search-results li .stars, #tv-search-results li .stars,
-#movie-search-results li .overview, #tv-search-results li .overview
+#movie-search-results li .overview, #tv-search-results li .overview,
+#movie-search-results li .genres, #tv-search-results li .genres
 {
 
   height: 30px;
@@ -204,6 +205,7 @@ header .searchbar-container h1{
 }
 
 #movie-search-results li .overview, #tv-search-results li .overview{
+  padding-top: 15px;
   height:calc(100% - 120px);
 
   /* le ellipsis funzionano soltanto con white-space: nowrap. Per mettere le ellipsis su un testo di più righe servirebbe un plugin di jquery o comunque utilizzare il js. la soluzione più comoda è la barra che di scorrimento e via. o altrimenti fare una riga soltano e nowrap e ellipsis */
