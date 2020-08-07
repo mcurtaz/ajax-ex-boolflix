@@ -1,0 +1,252 @@
+/* REGOLE GENERALI */
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+  font-family: "lato", sans-serif;
+  background-color: #000;
+  color: #fff;
+}
+
+ul {
+  list-style: none;
+}
+
+.rientro{
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+/* HEADER */
+
+header{
+  padding-top: 15px;
+  padding-bottom: 15px;
+  background-color: #000;
+  text-align: center;
+  font-size: 18px;
+}
+
+header label{
+  color:#fff;
+}
+
+header #searchbar{
+  width: 250px;
+  height: 30px;
+  padding-left: 8px;
+  border-radius: 8px;
+
+  font-size: 16px;
+}
+
+header #btn-searchbar{
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+header .searchbar-container{
+  display: flex;
+  justify-content: space-between;
+}
+
+header .searchbar-container h1{
+  color: darkred;
+}
+
+/* SEZIONE FILTRI */
+
+#filters{
+  display: flex;
+  justify-content: flex-start;
+
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+#filters .title{
+  width: 30%;
+}
+
+#filters #genre-select{
+  min-width: 200px;
+  font-size: 16px;
+  padding: 5px;
+}
+
+#filters .genres label{
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+#filters #genre-select option{
+  font-size: 16px;
+}
+
+
+/* SEZIONE RISULTATI RICERCA */
+
+.result-display{
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.result-display h2{
+  padding: 20px 0;
+  text-align: center;
+}
+
+#movie-search-results, #tv-search-results{
+  width: 100%;
+
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+
+/* CARD FILM/SERIE TV */
+
+#movie-search-results li, #tv-search-results li{
+  width: 25%;
+  max-width: 342px;
+  min-width: 180px;
+
+  padding: 12px;
+
+
+  font-size: 15px;
+  text-align: center;
+
+  overflow:hidden;
+
+}
+
+#movie-search-results li>div.poster, #tv-search-results li>div.poster{
+  width: 100%;
+  height: 100%;
+
+  position: relative;
+
+}
+
+#movie-search-results li>div.poster>img, #tv-search-results li>div.poster>img{
+  width: 100%;
+}
+
+/* in caso di immagine mancante mostro almeno il titolo */
+#movie-search-results li .no-img, #tv-search-results li .no-img{
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-size: 22px;
+  font-weight: bolder;
+  color: darkred;
+}
+
+/* INFO FILM */
+#movie-search-results .item-data-container, #tv-search-results .item-data-container{
+  width: 100%;
+  height: 100vh;
+
+  padding: 30px;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  background-color: rgba(0, 0, 0, 0.8);
+
+  z-index: 900;
+
+}
+
+#movie-search-results li .item-data-wrapper, #tv-search-results li .item-data-wrapper{
+  width: 800px;
+  height: 90vh;
+  padding: 15px;
+  margin: 0 auto;
+
+  background-color: #f1f1f1;
+
+  overflow-y: auto;
+
+
+  border-radius: 10px;
+
+  text-align: left;
+  color: #000;
+  font-size: 16px;
+}
+
+#movie-search-results .item-data-wrapper .info-header,
+#tv-search-results .item-data-wrapper .info-header{
+  height: 300px;
+  padding: 0 20px;
+  overflow: hidden;
+}
+
+#movie-search-results .item-data-wrapper .info-header img,
+#tv-search-results .item-data-wrapper .info-header img{
+  width: 100%;
+  transform: translateY(-10%);
+}
+
+#movie-search-results .item-data-wrapper .info-main,
+#tv-search-results .item-data-wrapper .info-main{
+  padding: 10px 0;
+}
+
+#movie-search-results .item-data-wrapper .info-main>div,
+#tv-search-results .item-data-wrapper .info-main>div{
+  padding: 5px 0;
+}
+
+
+#movie-search-results .item-data-wrapper .info-main .title, #tv-search-results .item-data-wrapper .info-main .title,
+#movie-search-results .item-data-wrapper .info-main .original-title, #tv-search-results .item-data-wrapper .info-main .original-title
+{
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+
+}
+
+#movie-search-results li .language img, #tv-search-results li .language img{
+  width: 30px;
+  vertical-align: middle;
+}
+
+#movie-search-results li .stars i, #tv-search-results li .stars i{
+  color: #ccc;
+}
+
+#movie-search-results li .stars i.col-y, #tv-search-results li .stars i.col-y{
+  color: yellow;
+}
+
+#movie-search-results li .overview, #tv-search-results li .overview{
+  padding-top: 10px;
+
+}
+
+/* MEDIA QUERIES */
+
+@media screen and (max-width: 900px) {
+  #movie-search-results li .item-data-wrapper, #tv-search-results li .item-data-wrapper{
+    width: 100%;
+  }
+
+  #movie-search-results .item-data-container, #tv-search-results .item-data-container{
+    padding: 15px;
+  }
+}
