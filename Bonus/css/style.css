@@ -17,8 +17,8 @@ ul {
 }
 
 .rientro{
-  padding-left: 10%;
-  padding-right: 10%;
+  padding-left: 8%;
+  padding-right: 8%;
 }
 
 /* HEADER */
@@ -113,13 +113,8 @@ header .searchbar-container h1{
 
 #movie-search-results li, #tv-search-results li{
   width: 25%;
-  max-width: 342px;
-  min-width: 180px;
-
   padding: 12px;
 
-
-  font-size: 15px;
   text-align: center;
 
   overflow:hidden;
@@ -128,7 +123,6 @@ header .searchbar-container h1{
 
 #movie-search-results li>div.poster, #tv-search-results li>div.poster{
   width: 100%;
-  height: 100%;
 
   position: relative;
 
@@ -138,9 +132,20 @@ header .searchbar-container h1{
   width: 100%;
 }
 
-/* in caso di immagine mancante mostro almeno il titolo */
-#movie-search-results li .no-img, #tv-search-results li .no-img{
-  display: none;
+/* in caso di immagine mancante */
+
+#movie-search-results li>div.poster.no-img, #tv-search-results li>div.poster.no-img{
+  height: 100%;
+
+  position: relative;
+
+  background-color: #f8fafb;
+}
+
+
+
+#movie-search-results li .no-img-title, #tv-search-results li .no-img-title{
+  /* display: none; */
   position: absolute;
   top: 50%;
   left: 50%;
@@ -152,6 +157,7 @@ header .searchbar-container h1{
 }
 
 /* INFO FILM */
+
 #movie-search-results .item-data-container, #tv-search-results .item-data-container{
   width: 100%;
   height: 100vh;
@@ -166,6 +172,7 @@ header .searchbar-container h1{
 
   z-index: 900;
 
+  display: none;
 }
 
 #movie-search-results li .item-data-wrapper, #tv-search-results li .item-data-wrapper{
@@ -186,17 +193,59 @@ header .searchbar-container h1{
   font-size: 16px;
 }
 
+#movie-search-results .item-data-wrapper .close-icon,
+#tv-search-results .item-data-wrapper .close-icon{
+  padding: 0 0 10px 0;
+  font-size: 25px;
+  text-align: right;
+}
+
+#movie-search-results .item-data-wrapper .close-icon i,
+#tv-search-results .item-data-wrapper .close-icon i{
+  cursor: pointer;
+}
+
 #movie-search-results .item-data-wrapper .info-header,
 #tv-search-results .item-data-wrapper .info-header{
-  height: 300px;
+  height: 30vh;
   padding: 0 20px;
+
+  position: relative;
+
   overflow: hidden;
+
+}
+
+#movie-search-results .item-data-wrapper .info-header:hover img,
+#tv-search-results .item-data-wrapper .info-header:hover img{
+  filter: brightness(.2);
+}
+
+#movie-search-results .item-data-wrapper .info-header:hover i,
+#tv-search-results .item-data-wrapper .info-header:hover i{
+  opacity: 1;
 }
 
 #movie-search-results .item-data-wrapper .info-header img,
 #tv-search-results .item-data-wrapper .info-header img{
   width: 100%;
   transform: translateY(-10%);
+  transition: filter .5s ease;
+}
+
+#movie-search-results .item-data-wrapper .info-header i,
+#tv-search-results .item-data-wrapper .info-header i{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-size: 50px;
+  color: #fff;
+
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .5s ease;
 }
 
 #movie-search-results .item-data-wrapper .info-main,
@@ -241,12 +290,49 @@ header .searchbar-container h1{
 
 /* MEDIA QUERIES */
 
+
 @media screen and (max-width: 900px) {
+  .rientro{
+    padding: 10px;
+  }
+
+  #movie-search-results li,
+  #tv-search-results li{
+     width: 33%;
+  }
+
   #movie-search-results li .item-data-wrapper, #tv-search-results li .item-data-wrapper{
     width: 100%;
   }
 
-  #movie-search-results .item-data-container, #tv-search-results .item-data-container{
+  #movie-search-results li .item-data-container, #tv-search-results li .item-data-container{
+    padding: 35px;
+  }
+
+}
+
+@media screen and (max-width: 700px) {
+
+  #movie-search-results li,
+  #tv-search-results li{
+     width: 50%;
+  }
+
+  #movie-search-results,
+  #tv-search-results{
+    justify-content: center;
+  }
+
+  #movie-search-results li .item-data-container,
+  #tv-search-results li .item-data-container{
     padding: 15px;
+  }
+
+}
+
+@media screen and (max-width: 500px) {
+  #movie-search-results li,
+  #tv-search-results li{
+     width: 100%;
   }
 }
