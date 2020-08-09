@@ -115,10 +115,13 @@ header .searchbar-container h1{
   width: 25%;
   padding: 12px;
 
+  display: block;
+
   text-align: center;
 
   overflow:hidden;
 
+  cursor: pointer;
 }
 
 #movie-search-results li>div.poster, #tv-search-results li>div.poster{
@@ -145,7 +148,7 @@ header .searchbar-container h1{
 
 
 #movie-search-results li .no-img-title, #tv-search-results li .no-img-title{
-  /* display: none; */
+  display: none;
   position: absolute;
   top: 50%;
   left: 50%;

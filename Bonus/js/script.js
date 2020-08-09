@@ -1,17 +1,22 @@
 //  BONUS -- IDEE
-// - grafica con modale a tutta pagina per le info del film
+// - grafica con modale a tutta pagina per le info del film  OK QUASI
 // - check per nascondere film per adulti
 // - select sort by per riordinare i film
 // - select per scegliere lingua inglese o italiano
 // - bottoni avanti indietro per cambiare pagina se ci sono più di 20 risultati
-// - ricerca di partenza con film di tendenza (API discover di TMDB) e tasto home
+// - ricerca di partenza con film di tendenza (API discover di TMDB) e tasto home  OK
+// - genre select che mostra solo generi effettivamente presenti
 
 $(document).ready(init);
 
 function init() {
   printGenresSelect();
   addSearchListeners();
-  addFilterGenresListener()
+  addFilterGenresListener();
+  showInfo();
+  sendDiscoverRequest("movie");
+  sendDiscoverRequest("tv");
+  addHomeButtonListener();
 }
 
 // FUNZIONE CHE CHIEDE ALL'API I GENERI DISPONIBILI E STAMPA LA SELECT
@@ -104,11 +109,9 @@ function sendRequest(input, type) {
       var arrayResults = data["results"];
         if (arrayResults.length == 0){ // se sono nel success ma l'array di risultati è vuoto significa che ho cercato ma non ho trovato niente. stampo un messaggio per l'utente
 
-          $(`#${type}-search-results`).html(`<h3>Mi dispiace non abbiamo trovato risultati per questa categoria.</h3>`);
+          $(`#${type}-search-results`).html(`<h3>Non ci sono risultati per questa categoria.</h3>`);
 
-        } else{ // se invece ci sono dei risultati ciclo su film per film e mando una richiesta per sapere gli attori. questa operazione va fatta qui. ASINCRONICITÀ DELLE FUNZIONI. SE CERCO DI FARLA DOPO LA PRIMA API LANCIA FUNZIONI CON TEMPI DIVERSI E MI RITROVO A STAMPARE IN PAGINA QUANDO LA SECONDA API NON HA ANCORA FINITO. INVECE LA STAMPA PARTIRÀ SOLO QUANDO AVRÒ RICEVUTO I DATI ANCHE DA QUESTA SECONDA API.
-
-        // POSSIBILE SOLUZIONE DUE: DENTRO QUESTO FOR COMINCIO A STAMPARE IL TEMPLATE HANDLEBAR. STAMPO ANCHE L'ID DEL FILM NEL TEMPLATE IN UN DATA-ID POI ALLA FINE DEL FOR LANCIO UNA FUNZIONE CHE MANDA LA RICHIESTA ALL'API PER IL CAST PARTENDO DALL'ID DELL'OGGETTO arrayResult[i] SU CUI STO CICLANDO. POI PER APPENDERLO CERCO NELL'HTML IL DATA-ID CHE SICURAMENTE SARÀ GIÀ NELL'HTML PERCHÈ QUANDO HO LA RISPOSTA DEL PRIMO AJAX LA STAMPA È PRATICAMENTE IMMEDIATA NEL FOR, POI LANCIO IL SECONDO AJAX E QUANDO MI RISPONDE SICURAMENTE IL FOR CHE STAMPA QUELL'ID LÌ È GIÀ CONCLUSO. QUESTA SECONDA SOLUZIONE MI EVITA ANCHE DI LANCIARE LA FUNZIONE PRINT SEARCH RESULT NELL'ERROR DELLA CHIAMATA PER IL CAST (CHE STAMPA LA CARD DEL FILM/SERIETV ANCHE SE IL CAST RISULTA 404 PAGE NOT FOUND COSA CHE SUCCEDE SPESSO COI FILM MINORI)
+        } else{
           for (var i = 0; i < arrayResults.length; i++) {
 
             printSearchResults(arrayResults[i], type);
@@ -160,8 +163,8 @@ function printCast(obj, type){
     },
     error: function (err) {
     // Spesso il cast non c'è in archivio. avendo comunque i dati del film faccio partire la funzione che stampa inizializzando l'array che contiene i nomi del cast ad undefined.
-      var cast = undefined;
-      printSearchResults(obj, cast, type);
+      var target = $(`#${type}-search-results li[data-id="${obj["id"]}"]`);
+      target.find(".actors").html("<strong>Attori: </strong> nessun dato sul cast");
     }
   });
 
@@ -313,9 +316,13 @@ function missingImages() { // finito di stampare tutti i risultati della ricerca
   // altra soluzione ancora: si può utilizzare if anche direttamente in handlebars {#if currentObj["poster_path"]} {{ url }} {/if} {else} {{url}} {/else}
   $(".poster>img").on("error", function(){ // se c'è un errore nellímmagine nel div con classe "poster" che sono le immagini appunto dei poster a quell'immagine do attributo src l'url della classica immagine "Image Not Found"
     $(this).attr("src", "./img/imgNotFound.png");
-    $(this).siblings(".no-img").css("display", "block");
+    $(this).siblings(".no-img-title").css("display", "block");
+    $(this).parent(".poster").addClass("no-img");
   });
 
+  $(".info-header>img").on("error", function(){
+    $(this).attr("src", "./img/imgNotFound.png");
+  });
 }
 
 // FUNZIONE CHE AGGIUNGE UN LISTENER ALLA SELECT CHE FILTRA PER GENERE
@@ -386,4 +393,89 @@ function filterGenres(selectedGenre){
   }
 
 
+}
+
+// FUNZIONE CHE MOSTRA LE INFO DEL FILM AL CLIK SULLA CARD
+function showInfo(){
+
+  $(document).on("click", "#movie-search-results li", function(){ // al click su un li della lista film mostro le info del film tipo modal
+
+     $(this).find(".item-data-container").fadeIn(); // dal li cliccato cerco il figlio item data container e lo mostro
+
+  });
+
+  $(document).on("click", "#tv-search-results li", function(){
+
+     $(this).find(".item-data-container").fadeIn();
+
+  });
+
+
+  $(document).on("click", ".item-data-container .close-icon i", function(e){ // al click sull'icona chiudi cerco il padre item data container e lo nascondo
+      $(this).parents(".item-data-container").fadeOut();
+  });
+
+  $(document).on("click", ".item-data-container", function(e){ // al click su item-data-container che avendo width 100% e height 100vh è l'intera finestra chiudo la modale con le info del film
+
+    e.stopImmediatePropagation(); // ATTENZIONE:  se io clicco su item-data-container il click si propaga nel senso che è come se cliccassi su tutti i genitori quindi per come è strutturato l'html anche sul li che lo contiene. ma il clic sul li apre la modale. quindi la modale si chiude e si riapre subito. stopImmediatePropagation() dice al js di eseguire la funzione e fermare la propagazione del click in questo modo si risolve
+    $(this).fadeOut();
+  });
+
+  $(document).on("click", ".item-data-wrapper", function(e){
+      e.stopImmediatePropagation(); // ATTENZIONE: per lo stesso principio di prima se io clicco nella modale il click arriva al padre item-data-container che col click chiude la modale. quindi fermo la propagazione. In linea teoriaca comunque la propagazione serve infatti quando io clicco sull'immagine del film il click si propaga fino al li che lo contiene e mostra la modale. Io posso cliccare su qualsiasi elemento all'interno del li e mi si apre la modale.
+  });
+
+}
+
+// FUNZIONE CHE LANCIA DUE API PER FILM E TV PIù POPOLARI
+function sendDiscoverRequest(type){
+
+  var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results.
+
+  target.text(""); // prima svuoto il target dalle ricerche precedenti
+
+  if(type == "movie"){ // cambio l'url a seconda se devo mandare una richiesta per cercare film o serie tv.
+    var url = "https://api.themoviedb.org/3/discover/movie"; // url dell'API di TMDB per film
+  } else {
+    var url = "https://api.themoviedb.org/3/discover/tv"; // url dell'API di TMDB  serietv
+  }
+
+  $.ajax({
+    url: url,
+    method: "GET",
+    data: {
+      "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
+      "sort_by": "popularity.desc", // chiede io film più popolari in ordine decrescente
+      "language": "it-IT" // scelgo la lingua italiana
+    },
+    success: function (data, success) {
+      var arrayResults = data["results"];
+        if (arrayResults.length == 0){ // se sono nel success ma l'array di risultati è vuoto significa che ho cercato ma non ho trovato niente. stampo un messaggio per l'utente
+
+          $(`#${type}-search-results`).html(`<h3>Non ci sono risultati per questa categoria.</h3>`);
+
+        } else{
+          for (var i = 0; i < arrayResults.length; i++) {
+
+            printSearchResults(arrayResults[i], type);
+
+            printCast(arrayResults[i], type);
+          }
+        }
+
+
+    },
+    error: function (err) {
+      // a prescindere dall'errore se qualcosa non va lo segnalo all'utente
+      target.html(`<h3>Ops! Qualcosa è andato storto. Riprova</h3>`);
+    }
+  });
+}
+
+// FUNZIONE CHE AL TASTO HOME STAMPA I FILM PIù POPOLARI
+function addHomeButtonListener(){
+  $("#btn-home").click(function(){
+    sendDiscoverRequest("movie");
+    sendDiscoverRequest("tv");
+  });
 }
