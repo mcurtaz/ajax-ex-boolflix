@@ -1,11 +1,13 @@
 //  BONUS -- IDEE
 // - grafica con modale a tutta pagina per le info del film  OK QUASI
-// - select sort by per riordinare i film
+// - select sort by per riordinare i film OK
 // - select per scegliere lingua inglese o italiano
 // - bottoni avanti indietro per cambiare pagina se ci sono più di 20 risultati
 // - ricerca di partenza con film di tendenza (API discover di TMDB) e tasto home  OK
 // - genre select che mostra solo generi effettivamente presenti OK
 
+
+// AGGIUNGI SORT DOPO LA STAMPA CHE SE UNO LASCIA SELEZIONATO RIORDINA
 $(document).ready(init);
 
 function init() {
@@ -16,6 +18,7 @@ function init() {
   sendDiscoverRequest("movie");
   sendDiscoverRequest("tv");
   addHomeButtonListener();
+  addSortBySelectListener();
 }
 
 // FUNZIONE CHE CHIEDE ALL'API I GENERI DISPONIBILI E STAMPA LA SELECT
@@ -126,6 +129,10 @@ function sendRequest(input, type) {
             showGenreSelectOption(arrayResults[i]);
           }
 
+          missingImages(); // questa funzione corregge eventuali errori per immagini mancanti sostituendo con altre immagini o avvisi appositi.
+
+          sortCard(); // finito di stampare riordino anche le card in base alla selezione della select sort-by
+
         }
 
 
@@ -193,9 +200,6 @@ function printSearchResults(objResult, type) {
 
   target.append(objHTML); // stampo nell'HTML
 
-  missingImages(); // questa funzione corregge eventuali errori per immagini mancanti sostituendo con altre immagini o avvisi appositi.
-
-
 }
 
 // FUNZIONE CHE CREA L'OGGETTO DA STAMPARE
@@ -256,6 +260,16 @@ function getObjToPrint(obj, type){
   var genres = getGenresNames(obj);
 
   obj["genres"] = genres;
+
+  // -------- ANNO DI RILASCIO
+
+  if(type == "movie"){
+
+    obj["year"] = obj["release_date"].slice(0, 4);
+  } else {
+    obj["year"] = obj["first_air_date"].slice(0, 4);
+  }
+
   return obj
 
 }
@@ -501,5 +515,39 @@ function showGenreSelectOption(obj){
 
   for (var i = 0; i < arrayGenres.length; i++) {
     $(`#genre-select option[value="${arrayGenres[i]}"]`).show(); // scorro tutti gli id di genere e mostro la option con value id del genere
+  }
+}
+
+// FUNZIONE CHE AGGIUNGE UN LISTENER ALLA SELECT CHE RIORDINA LE card
+function addSortBySelectListener(){
+
+  $("#filters #sort-by-select").change(sortCard);
+
+}
+
+// FUNZIONE CHE RIORDINA LE CARD A SECONDA DEL PARAMETRO SELEZIONATO
+function sortCard(){
+
+  var movieTarget = $("#movie-search-results li");
+  var tvTarget = $("#tv-search-results li");
+
+  movieTarget.sort(sortBy).appendTo("#movie-search-results"); // il metodo sort accetta come parametro una funzione che definisce meglio come riordinare. Utilizzando .appendTo non aggiunge elementi ma ristampa gli stessi elementi nel nuovo ordine
+  tvTarget.sort(sortBy).appendTo("#tv-search-results");
+
+}
+
+// FUNZIONE CHE GESTISCE IL RIORDINO DELLE CARD
+function sortBy(a, b){
+
+  // la funzione dentro al sort prende come argomenti a e b che rappresentano due generici elementi da riordinare. Se la funzione restituisce 1 l'elemento a va posizionato prima di b. -1 b prima di a. 0 non si scambiano. In questo caso nel li ho salvato dei data-attributo per ogni confronto che voglio fare. prendo il .val() della select e utilizzo il data corrispondente (data-popularity, data-title, data-year .. .. )
+
+  var by = $("#sort-by-select").val();
+
+  if ($(a).data(by) > $(b).data(by)){
+    return 1
+  } else if ($(a).data(by) < $(b).data(by)){
+    return -1
+  } else {
+    return 0
   }
 }

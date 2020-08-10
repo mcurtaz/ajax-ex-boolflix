@@ -25,7 +25,7 @@
 
   <!-- TEMPLATE HANDLEBARS -->
   <script id="result-template" type="text/x-handlebars-template">
-    <li data-id="{{id}}" data-adult="{{adult}}">
+    <li data-id="{{id}}" data-popularity="{{popularity}}" data-vote="{{vote_average}}" data-title="{{title}}" data-year="{{year}}">
       <div class="poster">
         <img src="{{poster}}" alt="Poster">
         <div class="no-img-title">{{ title }}</div>
@@ -81,9 +81,17 @@
   <div class="sort">
     <label for="sort-by">Ordina per: </label>
     <select id="sort-by-select">
-      <option value="">Popolarità</option>
-      <option value="">Voto</option>
-      <option value="">A-Z</option>
+      <option value="popularity">Popolarità</option>
+      <option value="vote">Voto</option>
+      <option value="year">Anno</option>
+      <option value="title">A-Z</option>
+    </select>
+  </div>
+  <div class="language">
+    <label for="language-select">Scegli lingua</label>
+    <select id="language-select">
+      <option value="it-IT" selected>ITA</option>
+      <option value="en-EN">ENG</option>
     </select>
   </div>
 </section>
