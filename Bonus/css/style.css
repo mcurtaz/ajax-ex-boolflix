@@ -62,7 +62,7 @@ header .searchbar-container h1{
 
 #filters{
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
 
   padding-top: 20px;
   padding-bottom: 20px;
@@ -72,18 +72,20 @@ header .searchbar-container h1{
   width: 30%;
 }
 
-#filters #genre-select{
+#filters #genre-select,
+#filters #sort-by-select{
   min-width: 200px;
   font-size: 16px;
   padding: 5px;
 }
 
-#filters .genres label{
+#filters label{
   margin-right: 10px;
   font-weight: bold;
 }
 
-#filters #genre-select option{
+#filters #genre-select option,
+#filters #sort-by-select option{
   font-size: 16px;
 }
 

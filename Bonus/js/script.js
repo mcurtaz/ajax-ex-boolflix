@@ -1,11 +1,10 @@
 //  BONUS -- IDEE
 // - grafica con modale a tutta pagina per le info del film  OK QUASI
-// - check per nascondere film per adulti
 // - select sort by per riordinare i film
 // - select per scegliere lingua inglese o italiano
 // - bottoni avanti indietro per cambiare pagina se ci sono più di 20 risultati
 // - ricerca di partenza con film di tendenza (API discover di TMDB) e tasto home  OK
-// - genre select che mostra solo generi effettivamente presenti
+// - genre select che mostra solo generi effettivamente presenti OK
 
 $(document).ready(init);
 
@@ -112,12 +111,21 @@ function sendRequest(input, type) {
           $(`#${type}-search-results`).html(`<h3>Non ci sono risultati per questa categoria.</h3>`);
 
         } else{
+
+          $("#genre-select option").not(`option[value="all"]`).hide();
+
           for (var i = 0; i < arrayResults.length; i++) {
 
             printSearchResults(arrayResults[i], type);
 
             printCast(arrayResults[i], type);
+
           }
+
+          for (var i = 0; i < arrayResults.length; i++) { // questa funzione mostra i nelle option della select dei generi i generi corrispondenti ai vari film/tv stampati in pagina
+            showGenreSelectOption(arrayResults[i]);
+          }
+
         }
 
 
@@ -392,7 +400,6 @@ function filterGenres(selectedGenre){
     });
   }
 
-
 }
 
 // FUNZIONE CHE MOSTRA LE INFO DEL FILM AL CLIK SULLA CARD
@@ -455,12 +462,20 @@ function sendDiscoverRequest(type){
           $(`#${type}-search-results`).html(`<h3>Non ci sono risultati per questa categoria.</h3>`);
 
         } else{
+
+          $("#genre-select option").not(`option[value="all"]`).hide(); // nascondo tutte le option della select dei generi tranne all
+
           for (var i = 0; i < arrayResults.length; i++) {
 
             printSearchResults(arrayResults[i], type);
 
             printCast(arrayResults[i], type);
           }
+
+          for (var i = 0; i < arrayResults.length; i++) {
+            showGenreSelectOption(arrayResults[i]);
+          }
+
         }
 
 
@@ -478,4 +493,13 @@ function addHomeButtonListener(){
     sendDiscoverRequest("movie");
     sendDiscoverRequest("tv");
   });
+}
+
+// FUNZIONE CHE MOSTRA NELLA SELECT DEI GENERI SOLTANTO I GENERI PRESENTI NEI FILM/TV STAMPATI IN PAGINA
+function showGenreSelectOption(obj){
+  var arrayGenres = obj["genre_ids"];
+
+  for (var i = 0; i < arrayGenres.length; i++) {
+    $(`#genre-select option[value="${arrayGenres[i]}"]`).show(); // scorro tutti gli id di genere e mostro la option con value id del genere
+  }
 }

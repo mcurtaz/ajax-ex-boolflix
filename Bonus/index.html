@@ -25,7 +25,7 @@
 
   <!-- TEMPLATE HANDLEBARS -->
   <script id="result-template" type="text/x-handlebars-template">
-    <li data-id="{{id}}">
+    <li data-id="{{id}}" data-adult="{{adult}}">
       <div class="poster">
         <img src="{{poster}}" alt="Poster">
         <div class="no-img-title">{{ title }}</div>
@@ -76,6 +76,14 @@
     <label for="genre-select">Generi: </label>
     <select id="genre-select" class="">
       <option value="all" selected>Tutti</option>
+    </select>
+  </div>
+  <div class="sort">
+    <label for="sort-by">Ordina per: </label>
+    <select id="sort-by-select">
+      <option value="">Popolarità</option>
+      <option value="">Voto</option>
+      <option value="">A-Z</option>
     </select>
   </div>
 </section>
