@@ -89,6 +89,41 @@ header .searchbar-container h1{
   font-size: 16px;
 }
 
+/* SEZIONE CONTATORE PAGINE E BOTTONI */
+
+#movie-pages,
+#tv-pages{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+#movie-pages .button,
+#tv-pages .button{
+  padding: 5px 20px;
+
+  font-size: 25px;
+
+  color: #a1a1a1;
+
+  border-radius: 10px;
+  border: 2px solid  #a1a1a1;
+}
+
+#movie-pages .button.active,
+#tv-pages .button.active{
+  color: #fff;
+  cursor: pointer;
+  border-color: #fff;
+}
+
+#movie-pages .pages-counter,
+#tv-pages .pages-counter{
+  font-size: 20px;
+  padding: 10px;
+}
+
 
 /* SEZIONE RISULTATI RICERCA */
 

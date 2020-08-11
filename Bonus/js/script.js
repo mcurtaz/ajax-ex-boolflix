@@ -15,8 +15,8 @@ function init() {
   addSearchListeners();
   addFilterGenresListener();
   showInfo();
-  sendDiscoverRequest("movie");
-  sendDiscoverRequest("tv");
+  sendDiscoverRequest("movie", "1");
+  sendDiscoverRequest("tv", "1");
   addHomeButtonListener();
   addSortBySelectListener();
 }
@@ -61,8 +61,8 @@ function addSearchListeners() {
    $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
 
    if (input != "") {
-     sendRequest(input, "movie"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
-     sendRequest(input,"tv");
+     sendRequest(input, "movie", "1"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
+     sendRequest(input,"tv", "1");
    }
 
  });
@@ -87,7 +87,7 @@ function addSearchListeners() {
 }
 
 // FUNZIONE CHE MANDA UNA RICHIESTA ALL'API
-function sendRequest(input, type) {
+function sendRequest(input, type, page) {
 
   var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results.
 
@@ -105,7 +105,8 @@ function sendRequest(input, type) {
     data: {
       "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
       "query": input, // la query è la stringa su cui si farà la ricerca. gli passo quello che ha scritto l'utente nell'input
-      "language": "it-IT" // scelgo la lingua italiana
+      "language": "it-IT", // scelgo la lingua italiana,
+      "page": page
     },
     success: function (data, success) {
       var arrayResults = data["results"];
@@ -114,6 +115,8 @@ function sendRequest(input, type) {
           $(`#${type}-search-results`).html(`<h3>Non ci sono risultati per questa categoria.</h3>`);
 
         } else{
+
+          pagesHandler(data, input, type);
 
           $("#genre-select option").not(`option[value="all"]`).hide();
 
@@ -449,7 +452,7 @@ function showInfo(){
 }
 
 // FUNZIONE CHE LANCIA DUE API PER FILM E TV PIù POPOLARI
-function sendDiscoverRequest(type){
+function sendDiscoverRequest(type, page){
 
   var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results.
 
@@ -467,7 +470,8 @@ function sendDiscoverRequest(type){
     data: {
       "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
       "sort_by": "popularity.desc", // chiede io film più popolari in ordine decrescente
-      "language": "it-IT" // scelgo la lingua italiana
+      "language": "it-IT", // scelgo la lingua italiana
+      "page": page
     },
     success: function (data, success) {
       var arrayResults = data["results"];
@@ -476,6 +480,8 @@ function sendDiscoverRequest(type){
           $(`#${type}-search-results`).html(`<h3>Non ci sono risultati per questa categoria.</h3>`);
 
         } else{
+
+          pagesHandler(data, "discover", type);
 
           $("#genre-select option").not(`option[value="all"]`).hide(); // nascondo tutte le option della select dei generi tranne all
 
@@ -543,11 +549,61 @@ function sortBy(a, b){
 
   var by = $("#sort-by-select").val();
 
-  if ($(a).data(by) > $(b).data(by)){
-    return 1
-  } else if ($(a).data(by) < $(b).data(by)){
-    return -1
+  if (by == "title"){
+
+    if ($(a).data(by) > $(b).data(by)){
+      return 1
+    } else if ($(a).data(by) < $(b).data(by)){
+      return -1
+    } else {
+      return 0
+    }
+
   } else {
-    return 0
+    return ($(b).data(by) - $(a).data(by))
   }
+
+
+}
+
+// FUNZIONE PER LA GESTIONE DEL CONTATORE DELLE PAGINE E DEI TASTI.
+function pagesHandler(obj, query, type){
+
+  // stampa di pagina corrente pagine totali e query in un data-query nell'ul. in modo che si possa recuperare quando c'è da cambiare pagina
+
+  var queryTarget = $(`#${type}-search-results`);
+  var currentPageTarget = $(`#${type}-pages #${type}-current-page`);
+  var totalPagesTarget = $(`#${type}-pages #${type}-total-pages`);
+
+  var currentPage = obj["page"];
+  var totalPages = obj["total_pages"];
+
+  queryTarget.data("query", query);
+
+  currentPageTarget.text(currentPage);
+  totalPagesTarget.text(totalPages);
+
+  // gestione dei bottoni attraverso la classe active.
+
+  var nextButtonTarget = $(`#${type}-pages #${type}-next-btn`);
+  var prevButtonTarget = $(`#${type}-pages #${type}-prev-btn`);
+
+  nextButtonTarget.removeClass("active");
+  prevButtonTarget.removeClass("active");
+
+  if (currentPage == 1){
+    nextButtonTarget.addClass("active");
+  } else if (currentPage == totalPages){
+    prevButtonTarget.addClass("active");
+  } else {
+    nextButtonTarget.addClass("active");
+    prevButtonTarget.addClass("active");
+  }
+
+}
+
+// FUNZIONE LISTENER PER TASTI PAGINA AVANTI/PAGINA indietro
+function addPageButtonsListener(){
+
+
 }
