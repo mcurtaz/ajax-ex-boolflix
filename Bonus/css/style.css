@@ -21,6 +21,12 @@ ul {
   padding-right: 8%;
 }
 
+/* classe che impedisce lo scroll quando le modali sono aperte */
+.stop-scroll{
+  overflow: hidden;
+}
+
+
 /* HEADER */
 
 header{
@@ -73,7 +79,8 @@ header .searchbar-container h1{
 }
 
 #filters #genre-select,
-#filters #sort-by-select{
+#filters #sort-by-select,
+#filters #language-select{
   min-width: 200px;
   font-size: 16px;
   padding: 5px;
@@ -85,7 +92,8 @@ header .searchbar-container h1{
 }
 
 #filters #genre-select option,
-#filters #sort-by-select option{
+#filters #sort-by-select option,
+#filters #language-select option{
   font-size: 16px;
 }
 
@@ -196,7 +204,7 @@ header .searchbar-container h1{
   color: darkred;
 }
 
-/* INFO FILM */
+/* INFO FILM - MODALE*/
 
 #movie-search-results .item-data-container, #tv-search-results .item-data-container{
   width: 100%;
@@ -213,6 +221,8 @@ header .searchbar-container h1{
   z-index: 900;
 
   display: none;
+
+  cursor: default;
 }
 
 #movie-search-results li .item-data-wrapper, #tv-search-results li .item-data-wrapper{
@@ -233,6 +243,20 @@ header .searchbar-container h1{
   font-size: 16px;
 }
 
+/* ::webkit-scrollbar definisce le caratteristiche della scrollbar. In questo caso solo la scrollbar della modale quella della pagina resta invariata */
+#movie-search-results li .item-data-wrapper::-webkit-scrollbar, #tv-search-results li .item-data-wrapper::-webkit-scrollbar{
+    width: 5px;   /* larghezza della scrollbar molto fine */
+    background: transparent; /* lo sfondo trasperente la rende invisibile. si vedrà solo quella parte di barra che scorre */
+}
+
+#movie-search-results li .item-data-wrapper::-webkit-scrollbar-thumb,
+#tv-search-results li .item-data-wrapper::-webkit-scrollbar-thumb {
+  /* ::-webkit-scrollbar-thumb è la parte di barra che scorre. ho cabiato colore e bordi arrotondati */
+    background: rgba(0, 0, 0, .6);
+    border-radius: 3px;
+}
+
+
 #movie-search-results .item-data-wrapper .close-icon,
 #tv-search-results .item-data-wrapper .close-icon{
   padding: 0 0 10px 0;
@@ -247,7 +271,7 @@ header .searchbar-container h1{
 
 #movie-search-results .item-data-wrapper .info-header,
 #tv-search-results .item-data-wrapper .info-header{
-  height: 30vh;
+
   padding: 0 20px;
 
   position: relative;
@@ -269,7 +293,6 @@ header .searchbar-container h1{
 #movie-search-results .item-data-wrapper .info-header img,
 #tv-search-results .item-data-wrapper .info-header img{
   width: 100%;
-  transform: translateY(-10%);
   transition: filter .5s ease;
 }
 
@@ -320,7 +343,7 @@ header .searchbar-container h1{
 }
 
 #movie-search-results li .stars i.col-y, #tv-search-results li .stars i.col-y{
-  color: yellow;
+  color: #f1f100;
 }
 
 #movie-search-results li .overview, #tv-search-results li .overview{
