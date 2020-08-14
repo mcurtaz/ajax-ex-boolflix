@@ -39,14 +39,56 @@
               <i class="far fa-play-circle"></i>
             </div>
             <div class="info-main">
-              <div class="title" ><strong>Titolo: </strong>&ensp;{{ title }}</div>
-              <div class="original-title"><strong>Titolo originale: </strong>&ensp;{{ original_title }}</div>
-              <div class="language" data-lng="{{original_language}}"><strong>Lingua: </strong>&ensp;{{{languageImg}}}</div>
-              <div class="stars"><strong>Voto: </strong>&ensp;{{{stars}}}</div>
-              <div class="genres" data-genres="{{genre_ids}}"><strong>Genere: </strong>{{{genres}}}</div>
-              <div class="actors"></div>
+              <div class="title" >
+                <strong>
+                  <span class="it-IT">Titolo:</span>
+                  <span class="en-EN">Title:</span>
+                </strong>
+                &ensp;{{ title }}
+              </div>
+              <div class="original-title">
+                <strong>
+                  <span class="it-IT">Titolo originale:</span>
+                  <span class="en-EN">Original Title:</span>
+                </strong>
+                &ensp;{{ original_title }}
+              </div>
+              <div class="language" data-lng="{{original_language}}">
+                <strong>
+                  <span class="it-IT">Lingua originale:</span>
+                  <span class="en-EN">Original Language:</span>
+                </strong>
+                &ensp;{{{languageImg}}}
+              </div>
+              <div class="stars">
+                <strong>
+                  <span class="it-IT">Voto</span>
+                  <span class="en-EN">Vote</span>
+                </strong>
+                &ensp;{{{stars}}}
+              </div>
+              <div class="genres" data-genres="{{genre_ids}}">
+                <strong>
+                  <span class="it-IT">Genere:</span>
+                  <span class="en-EN">Genree:</span>
+                </strong>
+                <span class="genre-list"></span>
+              </div>
+              <div class="actors">
+                <strong>
+                  <span class="it-IT">Attori:</span>
+                  <span class="en-EN">Cast:</span>
+                </strong>
+                <span class="actor-list"></span>
+              </div>
             </div>
-            <div class="overview"><strong>Trama: </strong>&ensp;{{{overview}}}</div>
+            <div class="overview">
+              <strong>
+                <span class="it-IT">Trama:</span>
+                <span class="en-EN">Overview:</span>
+              </strong>
+              &ensp;{{{overview}}}
+            </div>
           </div>
         </div>
       </div>
@@ -62,7 +104,10 @@
       <h1 id="btn-home">BOOLFIX</h1>
     </div>
     <div class="">
-      <label for="searchbar">Cerca film:</label>
+      <label for="searchbar">
+        <span class="it-IT">Cerca</span>
+        <span class="en-EN">Search</span>
+      </label>
       <input id="searchbar" type="text" name="searchbar">
       <button id="btn-searchbar" type="button" name="button"><i class="fas fa-search"></i></button>
     </div>
@@ -70,25 +115,41 @@
 </header>
 <section id="filters" class="rientro">
   <div class="title">
-    <h2>Filtra ricerca</h2>
+    <h2>
+      <span class="it-IT">Filtri</span>
+      <span class="en-EN">Filters</span>
+    </h2>
   </div>
   <div class="genres">
-    <label for="genre-select">Generi: </label>
+    <label for="genre-select">
+      <span class="it-IT">Genere:</span>
+      <span class="en-EN">Genre:</span>
+    </label>
     <select id="genre-select" class="">
-      <option value="all" selected>Tutti</option>
+      <option class="it-IT" value="all" selected>Tutti</option>
+      <option class="en-EN">All</option>
     </select>
   </div>
   <div class="sort">
-    <label for="sort-by">Ordina per: </label>
+    <label for="sort-by">
+      <span class="it-IT">Ordina per:</span>
+      <span class="en-EN">Sort by:</span>
+    </label>
     <select id="sort-by-select">
-      <option value="popularity">Popolarità</option>
-      <option value="vote">Voto</option>
-      <option value="year">Anno</option>
+      <option value="popularity" class="it-IT">Popolarità</option>
+      <option value="vote" class="it-IT">Voto</option>
+      <option value="year" class="it-IT">Anno</option>
+      <option value="popularity" class="en-EN">Popularity</option>
+      <option value="vote" class="en-EN">Vote</option>
+      <option value="year" class="en-EN">Year</option>
       <option value="title">A-Z</option>
     </select>
   </div>
   <div class="language">
-    <label for="language-select">Scegli lingua</label>
+    <label for="language-select">
+      <span class="it-IT">Lingua:</span>
+      <span class="en-EN">Language:</span>
+    </label>
     <select id="language-select">
       <option value="it-IT" selected>ITA</option>
       <option value="en-EN">ENG</option>
@@ -96,7 +157,10 @@
   </div>
 </section>
 <section class="result-display rientro">
-  <h2>Film</h2>
+  <h2>
+    <span class="it-IT">Film</span>
+    <span class="en-EN">Movies</span>
+  </h2>
   <div id="movie-pages">
     <div id="movie-prev-btn" class="button">
       <i class="fas fa-chevron-left"></i>
@@ -111,7 +175,10 @@
     </div>
   </div>
   <ul id="movie-search-results"></ul>
-  <h2>Serie TV</h2>
+  <h2>
+    <span class="it-IT">Serie TV</span>
+    <span class="en-EN">TV Series</span>
+  </h2>
   <div id="tv-pages">
     <div id="tv-prev-btn" class="button">
       <i class="fas fa-chevron-left"></i>

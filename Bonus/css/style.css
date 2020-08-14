@@ -26,6 +26,11 @@ ul {
   overflow: hidden;
 }
 
+/* all'inizio nascondo la lingua inglese */
+
+.en-EN {
+  display: none;
+}
 
 /* HEADER */
 

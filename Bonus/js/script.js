@@ -7,39 +7,54 @@
 // - genre select che mostra solo generi effettivamente presenti OK
 
 
+// TO-DO LIST
+// si scoprì che i generi per film e serie tv hanno due api diverse e alcuni generi si sovrappongono altri no. Idea soluzione è fare una mega funzione che stampa tutti i generi film sia in ita che in inglese. poi stampare i generi serie tv in ita e inglese ma soltanto controllando prima di stampare se $("option [conID].eClasselingua") esiste già, non stampo. se no stampo. Altro metodo potrebbe essere stampare tutto e poi eliminare eventuali duplicati basandoti sul testo. l'idea sarebbe:
+// - variabile array ok e variabile array da eliminare. -ciclo su tutte le option. - se $(this).text() non esiste negli array ok la matto negli array ok se esiste già metto $(this) cioè l'intera option nell'array da eliminare (che sarà quindi un array di "indirizzi") poi ciclo con each su array da eliminare e uso .remove()
+
+
 // AGGIUNGI SORT DOPO LA STAMPA CHE SE UNO LASCIA SELEZIONATO RIORDINA
 $(document).ready(init);
 
 function init() {
-  printGenresSelect();
+  printGenresSelect("movie", "it-IT");
+  printGenresSelect("movie", "en-EN");
+  printGenresSelect("tv", "it-IT");
+  printGenresSelect("tv", "en-EN");
   addSearchListeners();
   addFilterGenresListener();
   showInfo();
   // al caricamento della pagina faccio partire due send request in modo che la home siano i film più popolari
-  sendRequest("discover", "movie", "1");
-  sendRequest("discover", "tv", "1");
+  sendRequest("ajaxdiscover", "movie", "1");
+  sendRequest("ajaxdiscover", "tv", "1");
   addHomeButtonListener();
   addSortBySelectListener();
   addPageButtonsListener();
 }
 
 // FUNZIONE CHE CHIEDE ALL'API I GENERI DISPONIBILI E STAMPA LA SELECT
-function printGenresSelect(){
+function printGenresSelect(type, lng){
+
+
 
   $.ajax({
-    url: "https://api.themoviedb.org/3/genre/movie/list",
+    url: "https://api.themoviedb.org/3/genre/" + type + "/list",
     method: "GET",
     data: {
       "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia personale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
-      "language": "it-IT" // scelgo la lingua italiana
+      "language": lng // scelgo la lingua italiana
     },
     success: function (data){
       var genres = data["genres"];
       var target = $("#genre-select");
 
       for (var i = 0; i < genres.length; i++) {
-        optionHTML = `<option value="${genres[i]["id"]}" >${genres[i]["name"]}</option>`;
-        target.append(optionHTML);
+
+        if(!$(`#genre-select option[value="${genres[i]["id"]}"].${lng}`).length){ // se l'option con quell'id e quella lingua esistono già nell'html $(option[conID].classelingua).length == maggiore di uno a seconda di quanti ne trova. se non ci sono elementi corrispondenti a quella selezione la length è 0. quindi se non ci sono elementi la length 0 darebe falso, ci metto il ! not davanti e stampo la option solo se non c'è già. In questo modo evito sovrapposizioni tra i risultati della lista dei generi dei film e delle serietv
+
+          optionHTML = `<option value="${genres[i]["id"]}" class="${lng}" >${genres[i]["name"]}</option>`;
+          target.append(optionHTML);
+        }
+
       }
 
 
@@ -53,7 +68,6 @@ function printGenresSelect(){
 
 
 // ------------  FUNZIONI DI RICERCA E STAMPA IN PAGINA DELLE CARD
-
 
 // LISTENER SU EVENTI CHE FANNO PARTIRE LA FUNZIONE CON L'AJAX
 function addSearchListeners() {
@@ -101,7 +115,70 @@ function sendRequest(input, type, page) {
 
   target.data("query", input); // salvo l'input in un data in modo da poterlo recuperare quando occorre. per esempio per passare alla pagina successiva
 
-  if (input == "discover"){ // l'input discover è quello della pagina iniziale con i film più popolari. lo integro nella send request in modo da avere un unica funzione che gestisce tutte le ricerche
+  var url = getUrl(input, type);
+
+  var lng = $("#language-select").val(); // prendo la lingua dalla select
+
+
+  $.ajax({
+    url: url,
+    method: "GET",
+    data: {
+      "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
+      "query": input, // la query è la stringa su cui si farà la ricerca. gli passo quello che ha scritto l'utente nell'input. se è "ajaxdiscover" lascio input vuoto e verrà ignorato
+      "language": lng, // gli passo la lingua dalla select
+      "page": page
+    },
+    success: function (data, success) {
+      var arrayResults = data["results"];
+
+      pagesHandler(data, input, type); // questa funzione stampa in pagina il numero di pagine e attiva/disattiva i bottoni pagina avanti e pagina indietro
+
+      if (arrayResults.length == 0){ // se sono nel success ma l'array di risultati è vuoto significa che ho cercato ma non ho trovato niente. stampo un messaggio per l'utente
+
+        $(`#${type}-search-results`).html(`<h3>Non ci sono risultati per questa categoria.</h3>`);
+
+      } else{
+
+        $("#genre-select option").not(`option[value="all"].${lng}`).hide(); // nascondo tutte le option della select dei generi tranne all. Con la funzione showGenreSelectOption mostrerò soltanto quelli effettivamente presenti nei film in pagina
+
+        for (var i = 0; i < arrayResults.length; i++) {
+
+          printSearchResults(arrayResults[i], type); // la funzione con handlebars stampa tutte le card dei film risultanti dalla ricerca
+
+          printCast(arrayResults[i], type); // la funzione cast ha bisogno di un ajax specifico sui credits del film. Dopo aver stampato in pagina il film e tutto lancio la chiamata identificando successivamente dove andare a stampare il cast attraverso l'id del film
+
+
+          showGenreSelectOption(arrayResults[i], lng); // questa funzione mostra nelle select dei generi solo i generi presenti nei risultati della ricerca
+        }
+
+        printGenreNames(arrayResults, type)
+
+
+        missingImages(); // questa funzione corregge eventuali errori per immagini mancanti sostituendo con altre immagini o avvisi appositi.
+
+        sortCard(); // finito di stampare riordino anche le card in base alla selezione della select sort-by
+
+        var selectedGenre = $("#genre-select").val();
+
+        filterGenres(selectedGenre);
+
+      }
+
+
+    },
+    error: function (err) {
+      // a prescindere dall'errore se qualcosa non va lo segnalo all'utente
+      $(`#${type}-search-results`).html(`<h3>Ops! Qualcosa è andato storto. Riprova</h3>`);
+    }
+  });
+
+}
+
+
+// FUNZIONE CHE RESTITUISCE L'URL PER L'AJAX A SECONDA DELL'INPUT E DEL TYPE
+function getUrl(input, type) {
+  if (input == "ajaxdiscover"){ // l'input discover è quello della pagina iniziale con i film più popolari. lo integro nella send request in modo da avere un unica funzione che gestisce tutte le ricerche. c'è da dire che l'utente non può cercare un film o una serie che si chiama ajaxdiscover. pace
 
     if(type == "movie"){ // cambio l'url a seconda se devo mandare una richiesta per cercare film o serie tv.
       var url = "https://api.themoviedb.org/3/discover/movie"; // url dell'API di TMDB per film
@@ -120,56 +197,9 @@ function sendRequest(input, type, page) {
     }
   }
 
-
-  $.ajax({
-    url: url,
-    method: "GET",
-    data: {
-      "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
-      "query": input, // la query è la stringa su cui si farà la ricerca. gli passo quello che ha scritto l'utente nell'input
-      "language": "it-IT", // scelgo la lingua italiana,
-      "page": page
-    },
-    success: function (data, success) {
-      var arrayResults = data["results"];
-
-      pagesHandler(data, input, type); // questa funzione stampa in pagina il numero di pagine e attiva/disattiva i bottoni pagina avanti e pagina indietro
-
-      if (arrayResults.length == 0){ // se sono nel success ma l'array di risultati è vuoto significa che ho cercato ma non ho trovato niente. stampo un messaggio per l'utente
-
-        $(`#${type}-search-results`).html(`<h3>Non ci sono risultati per questa categoria.</h3>`);
-
-      } else{
-
-        $("#genre-select option").not(`option[value="all"]`).hide(); // nascondo tutte le option della select dei generi tranne all. Con la funzione showGenreSelectOption mostrerò soltanto quelli effettivamente presenti nei film in pagina
-
-        for (var i = 0; i < arrayResults.length; i++) {
-
-          printSearchResults(arrayResults[i], type); // la funzione con handlebars stampa tutte le card dei film risultanti dalla ricerca
-
-          printCast(arrayResults[i], type); // la funzione cast ha bisogno di un ajax specifico sui credits del film. Dopo aver stampato in pagina il film e tutto lancio la chiamata identificando successivamente dove andare a stampare il cast attraverso l'id del film
-
-        }
-
-        for (var i = 0; i < arrayResults.length; i++) { // questa funzione mostra nelle option della select dei generi soltanto i generi corrispondenti ai vari film/tv stampati in pagina
-          showGenreSelectOption(arrayResults[i]);
-        }
-
-        missingImages(); // questa funzione corregge eventuali errori per immagini mancanti sostituendo con altre immagini o avvisi appositi.
-
-        sortCard(); // finito di stampare riordino anche le card in base alla selezione della select sort-by
-
-      }
-
-
-    },
-    error: function (err) {
-      // a prescindere dall'errore se qualcosa non va lo segnalo all'utente
-      $(`#${type}-search-results`).html(`<h3>Ops! Qualcosa è andato storto. Riprova</h3>`);
-    }
-  });
-
+  return url
 }
+
 
 // FUNZIONE CHE CON I DATI DEL FILM MANDA RICHIESTA DI UN API PER SAPERE I NOMI DEGLI ATTORI
 function printCast(obj, type){
@@ -199,7 +229,7 @@ function printCast(obj, type){
 
       }
 
-      target.find(".actors").html("<strong>Attori: </strong>" + actors);
+      target.find(".actors .actor-list").text(actors);
 
     },
     error: function (err) {
@@ -285,14 +315,6 @@ function getObjToPrint(obj, type){
   }
 
 
-
-
-  // --------  GENERI
-
-  var genres = getGenresNames(obj);
-
-  obj["genres"] = genres;
-
   // -------- ANNO DI RILASCIO
 
   if(type == "movie"){
@@ -327,30 +349,6 @@ function getStars(obj) {
   return stars // la funzione ritorna una stringa che sarà una serie di "<i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>". Nell'html si vedranno 5 stelle.
 }
 
-// FUNZIONE CHE CREA LA LISTA DI GENERI
-function getGenresNames(obj){
-
-  var ids = obj["genre_ids"]; // per ogni film/serie prendo la lista di ids
-  var genres = [];
-
-  if (ids.length == 0){ // ATTENZIONE: per mettere nelle condizioni array vuoto conviene usare array.length perchè un array vuoto in booleano è true. (non come le stringhe che in booleano danno false)
-
-    genres = "Nessun genere trovato";
-
-  } else {
-
-    for (var i = 0; i < ids.length; i++) { // se è presente una lista di ids ciclo sulla lista. Nella select dei generi ho delle option con id del genre nel value e nome corrispondente nel testo della option. Userò quelle
-      var listGenreId = $(`#genre-select option[value="${ids[i]}"]`); // seleziono la option con l'ID corrispondente a un id della lista id dei generi del film in oggetto
-
-      var listGenreName = listGenreId.text(); // prendo il text di quella option
-
-      genres.push(" " + listGenreName); // lo pusho in un array dei generi con uno spazio per separarli. La virgola tra uno e l'altro la stampa in automatico quando stampi un array.
-    }
-  }
-
-  return genres // la funzione ritorna la lista di generi
-}
-
 // FUNZIONE PER LA GESTIONE DI IMMAGINI MANCANTI
 function missingImages() { // finito di stampare tutti i risultati della ricerca
 
@@ -380,11 +378,11 @@ function missingImages() { // finito di stampare tutti i risultati della ricerca
 }
 
 // FUNZIONE CHE MOSTRA NELLA SELECT DEI GENERI SOLTANTO I GENERI PRESENTI NEI FILM/TV STAMPATI IN PAGINA
-function showGenreSelectOption(obj){
+function showGenreSelectOption(obj, lng){
   var arrayGenres = obj["genre_ids"];
 
   for (var i = 0; i < arrayGenres.length; i++) {
-    $(`#genre-select option[value="${arrayGenres[i]}"]`).show(); // scorro tutti gli id di genere e mostro la option con value id del genere
+    $(`#genre-select option[value="${arrayGenres[i]}"].${lng}`).show(); // scorro tutti gli id di genere e mostro la option con value id del genere
   }
 }
 
@@ -432,6 +430,66 @@ function pagesHandler(obj, query, type){
 
 }
 
+// FUNZIONE PER LA STAMPA DEI GENERI CON UN AJAX DELLA LISTA generi
+function printGenreNames(arrayResults, type) {
+
+  var lng = $("#language-select").val();
+
+  $.ajax({
+    url: "https://api.themoviedb.org/3/genre/" + type + "/list",
+    method: "GET",
+    data: {
+      "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia personale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
+      "language": lng // scelgo la lingua italiana
+    },
+    success: function (data){
+
+      var genres = data["genres"];
+
+      for (var i = 0; i < arrayResults.length; i++) {
+
+        getGenresNames(arrayResults[i], genres, type);
+
+      }
+
+
+    },
+    error: function(err){
+      console.log("err", err);
+    }
+  });
+
+}
+
+// FUNZIONE CHE CREA LA LISTA DI GENERI
+function getGenresNames(obj, genreList, type){
+
+  var target = $(`#${type}-search-results li[data-id="${obj["id"]}"]`); // il target è la card del film stampata in pagina con il data-id corrispondente al film in questione
+
+
+  var genreIds = obj["genre_ids"]; // per ogni film/serie prendo la lista di ids
+  var genresNames = [];
+
+  if (genreIds.length == 0){ // ATTENZIONE: per mettere nelle condizioni array vuoto conviene usare array.length perchè un array vuoto in booleano è true. (non come le stringhe che in booleano danno false)
+
+    genresNames = "Nessun genere trovato";
+
+  } else {
+
+    for (var i = 0; i < genreIds.length; i++) { // se è presente una lista di ids ciclo sulla lista.
+
+      var genreListElement = genreList.filter(function(e) { // questa funzione filtra l'array della lista generi e ritorna l'oggetto che ha alla chiave id (e["id"]) un valore che corrisponde al genreIds[i]. cioè io sto scorrendo su tutti gli genere id del singolo film che può avere più generi quindi sarà una roba tipo 34, 99. 1070 e io scorro e ne prendo uno alla volta. Poi dalla lista dei generi con relativi nomi (che è una roba tipo id34 nomeCommedia, id99 nomeAvventura) prendo quell'oggetto che ha lo stesso id
+      return e["id"] == genreIds[i];
+      });
+
+      var genreName = genreListElement[0]["name"]; // la funzione di prima non restituisce un oggetto ma un array contenente tutti gli oggetti con quella caratteristica (stesso id) che essendo l'id univoco sarà un array con un solo oggetto (id: numero, name: nome del genere). Mi prendo il nome del genere e lo pusho in un array di tutti i nomi dei generi del film in questione
+
+      genresNames.push(" " + genreName);
+    }
+
+    target.find(".genre-list").text(genresNames);
+  }
+}
 
 
 // -------------------  FUNZIONI DI FILTRO DEI RISULTATI
@@ -610,8 +668,8 @@ function addPageButtonsListener(){
 // FUNZIONE CHE AL TASTO HOME STAMPA I FILM PIù POPOLARI
 function addHomeButtonListener(){
   $("#btn-home").click(function(){
-    sendDiscoverRequest("movie");
-    sendDiscoverRequest("tv");
+    sendRequest("ajaxdiscover", "movie", "1");
+    sendRequest("ajaxdiscover", "tv", "1");
   });
 }
 
