@@ -29,6 +29,7 @@ function init() {
   addHomeButtonListener();
   addSortBySelectListener();
   addPageButtonsListener();
+  addLanguageSelectListener()
 }
 
 // FUNZIONE CHE CHIEDE ALL'API I GENERI DISPONIBILI E STAMPA LA SELECT
@@ -111,6 +112,8 @@ function sendRequest(input, type, page) {
 
   var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results.
 
+  var genreSelectOptions =  $("#genre-select option").hide(); // nascondo anche tutte le opzioni della select per genere poi mostrerò soltanto quelle presenti nei risultati della ricerca con una funzione apposita
+
   target.text(""); // prima svuoto il target dalle ricerche precedenti
 
   target.data("query", input); // salvo l'input in un data in modo da poterlo recuperare quando occorre. per esempio per passare alla pagina successiva
@@ -140,28 +143,25 @@ function sendRequest(input, type, page) {
 
       } else{
 
-        $("#genre-select option").not(`option[value="all"].${lng}`).hide(); // nascondo tutte le option della select dei generi tranne all. Con la funzione showGenreSelectOption mostrerò soltanto quelli effettivamente presenti nei film in pagina
-
         for (var i = 0; i < arrayResults.length; i++) {
 
           printSearchResults(arrayResults[i], type); // la funzione con handlebars stampa tutte le card dei film risultanti dalla ricerca
 
           printCast(arrayResults[i], type); // la funzione cast ha bisogno di un ajax specifico sui credits del film. Dopo aver stampato in pagina il film e tutto lancio la chiamata identificando successivamente dove andare a stampare il cast attraverso l'id del film
 
-
           showGenreSelectOption(arrayResults[i], lng); // questa funzione mostra nelle select dei generi solo i generi presenti nei risultati della ricerca
+
         }
 
-        printGenreNames(arrayResults, type)
+        toggleLanguageInfoModal(lng, type);
 
+        printGenreNames(arrayResults, type);
 
         missingImages(); // questa funzione corregge eventuali errori per immagini mancanti sostituendo con altre immagini o avvisi appositi.
 
         sortCard(); // finito di stampare riordino anche le card in base alla selezione della select sort-by
 
-        var selectedGenre = $("#genre-select").val();
-
-        filterGenres(selectedGenre);
+        filterGenres();
 
       }
 
@@ -199,7 +199,6 @@ function getUrl(input, type) {
 
   return url
 }
-
 
 // FUNZIONE CHE CON I DATI DEL FILM MANDA RICHIESTA DI UN API PER SAPERE I NOMI DEGLI ATTORI
 function printCast(obj, type){
@@ -379,6 +378,9 @@ function missingImages() { // finito di stampare tutti i risultati della ricerca
 
 // FUNZIONE CHE MOSTRA NELLA SELECT DEI GENERI SOLTANTO I GENERI PRESENTI NEI FILM/TV STAMPATI IN PAGINA
 function showGenreSelectOption(obj, lng){
+
+  $(`#genre-select option[value="all"].${lng}`).show(); // mostro l'option tutti/all
+
   var arrayGenres = obj["genre_ids"];
 
   for (var i = 0; i < arrayGenres.length; i++) {
@@ -499,16 +501,16 @@ function getGenresNames(obj, genreList, type){
 function addFilterGenresListener() {
   $("#genre-select").change(function(){
 
-    var selectedGenre = $(this).val();
 
-    filterGenres(selectedGenre);
+    filterGenres();
 
   });
 }
 
 // FUNZIONE CHE FILTRA LE CARD DA VISUALIZZARE IN BASE AL GENERE
-function filterGenres(selectedGenre){
+function filterGenres(){
 
+  var selectedGenre = $("#genre-select").val();
   //  due diversi target per movie e serie tv. il genere selezionato viene passato come argomento. i generi sono sotto forma di id identificativo. se sono più generi nel data-genres trovo una stringa del tipo 99,880,25 se però è un genere solo nel data-genres troverò un numero
   var movieTarget = $("#movie-search-results li");
 
@@ -545,7 +547,7 @@ function filterGenres(selectedGenre){
 
     tvTarget.each(function(){ // ripeto le stesse operazioni per le card delle serie tv
 
-      var targetGenresIds = $(this).data("genres");
+      var targetGenresIds = $(this).find(".genres").data("genres");
 
       if(isNaN(targetGenresIds) && targetGenresIds.includes(selectedGenre)){
 
@@ -602,6 +604,38 @@ function sortBy(a, b){
   } else {
     return ($(b).data(by) - $(a).data(by))
   }
+
+
+}
+
+// FUNZIONE CHE MOSTRA/NASCONDE GLI ELEMENTI STATICI IN PAGINA IN BASE ALLA Lingua
+function toggleLanguage(){
+
+  var lng = $("#language-select").val();
+
+  $(".it-IT").hide();
+  $(".en-EN").hide();
+
+  $("." + lng).show();
+
+  // cambio le selezioni della select nella lingua giusta
+  var genreSelected = $("#genre-select").val();
+  var sortSelected = $("#sort-by-select").val();
+
+  $(`#genre-select option[value="${genreSelected}"].${lng}`).prop("selected", "selected");
+
+  $(`#sort-by-select option[value="${sortSelected}"].${lng}`).prop("selected", "selected");
+}
+
+// FUNZIONE CHE CAMBIA LA LINGUA ALLE INTESTAZIONI NELLE INFO FILM
+function toggleLanguageInfoModal(lng, type){
+
+  // nascondo tutto
+  $(`#${type}-search-results .it-IT`).hide();
+  $(`#${type}-search-results .en-EN`).hide();
+
+  // mostro quello che serve
+  $(`#${type}-search-results .${lng}`).show();
 
 
 }
@@ -708,4 +742,27 @@ function showInfo(){
       e.stopImmediatePropagation(); // ATTENZIONE: per lo stesso principio di prima se io clicco nella modale il click arriva al padre item-data-container che col click chiude la modale. quindi fermo la propagazione. In linea teoriaca comunque la propagazione serve infatti quando io clicco sull'immagine del film il click si propaga fino al li che lo contiene e mostra la modale. Io posso cliccare su qualsiasi elemento all'interno del li e mi si apre la modale.
   });
 
+}
+
+// FUNZIONE LISTENER SU CAMBIO DI Lingua
+function addLanguageSelectListener(){
+  var languageSelect = $("#language-select");
+
+  languageSelect.change(function(){
+
+    toggleLanguage();
+
+    var lng = languageSelect.val(); // prendo la lingua selezionata
+
+    var movieQuery = $("#movie-search-results").data("query"); // prendo la query da dove l'ho salvata. Potrebbe essere "discover" o l'ultima ricerca fatta
+    var moviePage = $("#movie-current-page").text(); // prendo dalla stampa in pagina che pagina sto visualizzando attualmente
+
+    var tvQuery = $("#tv-search-results").data("query");
+
+    var tvPage = $("#tv-current-page").text();
+
+    sendRequest(movieQuery, "movie", moviePage);
+    sendRequest(tvQuery, "tv", tvPage);
+
+  });
 }
