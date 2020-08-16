@@ -32,7 +32,6 @@ function init() {
   addPageButtonsListener();
   addLanguageSelectListener();
   addFilterMenuToggle();
-  addSwipePageListener();
 }
 
 // FUNZIONE CHE CHIEDE ALL'API I GENERI DISPONIBILI E STAMPA LA SELECT
