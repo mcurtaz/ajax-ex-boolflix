@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500&family=Permanent+Marker&display=swap');
+
 /* REGOLE GENERALI */
 
 *{
@@ -7,7 +9,7 @@
 }
 
 body{
-  font-family: "lato", sans-serif;
+  font-family: "kanit", sans-serif;
   background-color: #000;
   color: #fff;
 }
@@ -48,7 +50,7 @@ header label{
 
 header #searchbar{
   width: 250px;
-  height: 30px;
+  height: 35px;
   padding-left: 8px;
   border-radius: 8px;
 
@@ -56,17 +58,23 @@ header #searchbar{
 }
 
 header #btn-searchbar{
+  display: inline-block;
   padding: 5px 10px;
   border-radius: 5px;
+
+  cursor: pointer;
 }
 
 header .searchbar-container{
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 header .searchbar-container h1{
   color: darkred;
+  cursor: pointer;
+  font-family: 'Permanent Marker', cursive;
 }
 
 /* SEZIONE FILTRI */
@@ -80,13 +88,47 @@ header .searchbar-container h1{
 }
 
 #filters .title{
-  width: 30%;
+  position: relative;
+
+  flex-grow: 3;
+}
+
+#filters #filters-menu-wrapper{
+  flex-grow: 1;
+}
+
+#filters .hidden-btn{
+  width: 100%;
+  height: 100%;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  font-size: 25px;
+  text-align: right;
+
+  padding-right: 10px;
+
+  display: none;
+}
+
+#filters #filters-menu{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
 }
 
 #filters #genre-select,
-#filters #sort-by-select,
+#filters #sort-by-select{
+  width: 150px;
+  font-size: 16px;
+  padding: 5px;
+}
+
 #filters #language-select{
-  min-width: 200px;
+  width: 80px;
   font-size: 16px;
   padding: 5px;
 }
@@ -114,9 +156,9 @@ header .searchbar-container h1{
 
 #movie-pages .button,
 #tv-pages .button{
-  padding: 5px 20px;
+  padding: 2px 25px;
 
-  font-size: 25px;
+  font-size: 18px;
 
   color: #a1a1a1;
 
@@ -146,6 +188,7 @@ header .searchbar-container h1{
 }
 
 .result-display h2{
+  font-size: 30px;
   padding: 20px 0;
   text-align: center;
 }
@@ -246,6 +289,8 @@ header .searchbar-container h1{
   text-align: left;
   color: #000;
   font-size: 16px;
+
+  position: relative;
 }
 
 /* ::webkit-scrollbar definisce le caratteristiche della scrollbar. In questo caso solo la scrollbar della modale quella della pagina resta invariata */
@@ -264,9 +309,13 @@ header .searchbar-container h1{
 
 #movie-search-results .item-data-wrapper .close-icon,
 #tv-search-results .item-data-wrapper .close-icon{
-  padding: 0 0 10px 0;
+  position: sticky;
+  top: 0px;
+
   font-size: 25px;
+
   text-align: right;
+  z-index: 900;
 }
 
 #movie-search-results .item-data-wrapper .close-icon i,
@@ -274,10 +323,15 @@ header .searchbar-container h1{
   cursor: pointer;
 }
 
+#movie-search-results .item-data-wrapper .close-icon i:hover,
+#tv-search-results .item-data-wrapper .close-icon i:hover{
+  transform: scale(1.1);
+}
+
 #movie-search-results .item-data-wrapper .info-header,
 #tv-search-results .item-data-wrapper .info-header{
 
-  padding: 0 20px;
+  padding: 0 25px;
 
   position: relative;
 
@@ -338,6 +392,10 @@ header .searchbar-container h1{
 
 }
 
+#movie-search-results li .language img, #tv-search-results li .language{
+  text-transform: uppercase;
+}
+
 #movie-search-results li .language img, #tv-search-results li .language img{
   width: 30px;
   vertical-align: middle;
@@ -359,7 +417,7 @@ header .searchbar-container h1{
 /* MEDIA QUERIES */
 
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1000px) {
   .rientro{
     padding: 10px;
   }
@@ -379,7 +437,62 @@ header .searchbar-container h1{
 
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 800px) {
+
+  header .searchbar-container{
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  header .searchbar{
+    padding: 10px 0;
+  }
+
+
+  #filters{
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0;
+  }
+
+  #filters .title{
+   padding: 0 40px 0 5%;
+  }
+
+  #filters .hidden-btn{
+    display: block;
+    cursor: pointer;
+  }
+
+  #filters-menu-wrapper{
+    width: 100%;
+
+    box-shadow:  0px 8px 5px -5px rgba(212,212,212,0.57);
+
+    display: none;
+  }
+
+  #filters #filters-menu{
+    padding: 10px 5%;
+
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+
+
+  }
+
+  #filters #filters-menu>div{
+    padding: 5px 0;
+  }
+
+
+
+  .result-display h2{
+    padding-top: 10px;
+    padding-bottom: 0;
+  }
 
   #movie-search-results li,
   #tv-search-results li{
@@ -394,6 +507,20 @@ header .searchbar-container h1{
   #movie-search-results li .item-data-container,
   #tv-search-results li .item-data-container{
     padding: 15px;
+  }
+
+  #movie-search-results li .item-data-container .info-header img,
+  #tv-search-results li .item-data-container .info-header img{
+    filter: brightness(.6);
+  }
+
+  #movie-search-results li .item-data-container .info-header i,
+  #tv-search-results li .item-data-container .info-header i{
+    opacity: 1;
+  }
+
+  #movie-pages{
+    padding: 0;
   }
 
 }

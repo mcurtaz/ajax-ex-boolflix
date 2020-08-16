@@ -1,10 +1,11 @@
 //  BONUS -- IDEE
-// - grafica con modale a tutta pagina per le info del film  OK QUASI
+// - grafica con modale a tutta pagina per le info del film  OK CIRCA
 // - select sort by per riordinare i film OK
-// - select per scegliere lingua inglese o italiano
+// - select per scegliere lingua inglese o italiano OK
 // - bottoni avanti indietro per cambiare pagina se ci sono più di 20 risultati OK
 // - ricerca di partenza con film di tendenza (API discover di TMDB) e tasto home  OK
 // - genre select che mostra solo generi effettivamente presenti OK
+// - cambio pagina con swipe in mediaquery smartphone (CI SAREBBE DA UTILIZZARE JQUERY MOBILE CHE PERò è ABBASTANZA INVASIVO CAMBIA UN PO' IL LAYOUT DELLA PAGINA. ALTRIMENTI SI PUò STUDIARE COME FARE LO SWIPE EVENT CON JS VANILLA MA SAREBBE MEGLIO STUDIARCI UN PO' PER CAPIRLO PIUTTOSTO CHE FARE COPIA INCOLLA)
 
 
 // TO-DO LIST
@@ -29,7 +30,9 @@ function init() {
   addHomeButtonListener();
   addSortBySelectListener();
   addPageButtonsListener();
-  addLanguageSelectListener()
+  addLanguageSelectListener();
+  addFilterMenuToggle();
+  addSwipePageListener();
 }
 
 // FUNZIONE CHE CHIEDE ALL'API I GENERI DISPONIBILI E STAMPA LA SELECT
@@ -665,10 +668,8 @@ function addPageButtonsListener(){
 
     if($(this).hasClass("active")){
         var query = $("#movie-search-results").data("query");
-        console.log(query);
         var currentPage = $("#movie-current-page").text();
         var page = parseInt(currentPage) + 1;
-        console.log(page);
         sendRequest(query, "movie", page);
       }
   });
@@ -765,4 +766,43 @@ function addLanguageSelectListener(){
     sendRequest(tvQuery, "tv", tvPage);
 
   });
+}
+
+// FUNZIONE CHE MOSTRA NASCONDE IL MENU DEI FILTRI NELLE MEDIAQUERY SMATHPHONE
+function addFilterMenuToggle(){
+
+  $("#filters .hidden-btn").click(function(){
+
+    var target = $("#filters #filters-menu-wrapper"); // ho usato un div wrapper perchè facendo slideToggle su filters-menu mi cambiava il display flex in display block e none. volendo si poteva fare .css("display", "none") e .css("display", "flex") ma avrei perso l'effetto slide. altrimenti chiamare una funzione di callback a slideDown che metteva display flex. (.slideDown(500,function(){$(this).css("display", "flex")})) però avrei dovuto dividere slide up e down e utilizzare tipo una classe d'appoggio o un if su .css("display") per sapere se il menu era aperto o chiuso
+
+    target.slideToggle();
+
+    $(this).find("i.fas").toggleClass("fa-angle-down");
+    $(this).find("i.fas").toggleClass("fa-angle-up");
+  });
+
+  // aggiungo anche un caso limite. Se ho il menu nascosto in formato smartphone e allargo la finestra a formati più grandi il menu rimane nascosto. per risolvere:
+
+  $( window ).resize(function() { // al resize della finestra (quindi quando cambiano le dimensioni della finestra)
+
+    if($(window).width() > 800){ // se è sopra gli 800 px mostro il filter-menu-wrapper
+      var target = $("#filters #filters-menu-wrapper");
+      target.css("display", "block");
+    }
+
+    // se dopo aver fatto il passaggio da smatphone a schermo grande in cui tutto funziona e ricompare il menu filter allineato torno indietro si dovrebbe vedere solo il bottone filter che fa comparire il menu invece il menu compare già aperto. poi comunque il bottone va quindi è una sottigliezza però si può correggere con
+
+    if($(window).width() <= 800){
+      var target = $("#filters #filters-menu-wrapper");
+
+      target.css("display", "none");
+
+      // per lo stesso motivo se allargo e stringo la finestra con il menu aperto rischio che la freccia apri chiudi filter mi rimane al contrario.
+
+      $("#filters .hidden-btn i.fas").addClass("fa-angle-down").removeClass("fa-angle-up");
+    }
+
+  });
+
+
 }
