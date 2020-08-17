@@ -101,6 +101,7 @@ function addSearchListeners() {
 
      $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
 
+     $("#searchbar").blur();
      sendRequest(input,"movie"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
      sendRequest(input,"tv");
    }
@@ -486,9 +487,12 @@ function getGenresNames(obj, genreList, type){
       return e["id"] == genreIds[i];
       });
 
-      var genreName = genreListElement[0]["name"]; // la funzione di prima non restituisce un oggetto ma un array contenente tutti gli oggetti con quella caratteristica (stesso id) che essendo l'id univoco sarà un array con un solo oggetto (id: numero, name: nome del genere). Mi prendo il nome del genere e lo pusho in un array di tutti i nomi dei generi del film in questione
+      if (genreListElement[0] != undefined){ // a volte qualcosa va storto e non trova corrispondenza tra genere id e un oggetto con lo stesso id nella lista dei generi. per evitare che mi dia l'errore in console se non trova l'oggetto con quell'id non fa nulla e passa al genere successivo
 
-      genresNames.push(" " + genreName);
+        var genreName = genreListElement[0]["name"]; // la funzione di prima non restituisce un oggetto ma un array contenente tutti gli oggetti con quella caratteristica (stesso id) che essendo l'id univoco sarà un array con un solo oggetto (id: numero, name: nome del genere). Mi prendo il nome del genere e lo pusho in un array di tutti i nomi dei generi del film in questione
+
+        genresNames.push(" " + genreName);
+      }
     }
 
     target.find(".genre-list").text(genresNames);

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500&family=Permanent+Marker&display=swap');
-
 /* REGOLE GENERALI */
 
 *{
@@ -40,7 +38,6 @@ header{
   padding-top: 15px;
   padding-bottom: 15px;
   background-color: #000;
-  text-align: center;
   font-size: 18px;
 }
 
@@ -448,6 +445,11 @@ header .searchbar-container h1{
     padding: 10px 0;
   }
 
+  header #searchbar{
+    width: 60%;
+
+  }
+
 
   #filters{
     flex-direction: column;
@@ -523,11 +525,4 @@ header .searchbar-container h1{
     padding: 0;
   }
 
-}
-
-@media screen and (max-width: 500px) {
-  #movie-search-results li,
-  #tv-search-results li{
-     width: 100%;
-  }
 }
