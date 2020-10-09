@@ -1,6 +1,6 @@
 # Boolfix
 
-![Ops! Click here to see the pic](https://drive.google.com/uc?export=view&id=1KK8_lrvempu4fUMXQgXVAZ4MfCkteKst)
+![Ops! Click here to see the pic](https://res.cloudinary.com/mcstorage/image/upload/v1602264900/boolfix-lg-min_1_tb2kzm.png)
 
 ### About
 
@@ -22,7 +22,7 @@ Dopodichè è possibile:
 
 Il layout della pagina è responsive.
 
-<img src="https://drive.google.com/uc?export=view&id=1gTawe3RHrFBJY8z1icFr11ckaRVUN7W5" width="250">
+<img src="https://res.cloudinary.com/mcstorage/image/upload/v1602264892/bolfix-sm-min_s9ltin.png" width="250">
 
 
 
@@ -32,11 +32,13 @@ Il layout della pagina è responsive.
 Al click sulla card di un film o di una serie tv viene mostrata una modale con informazioni aggiuntive (ottenute grazie ad una seconda API) come voto, trama, cast e altri.
 
 
-![Ops! Click here to see the pic](https://drive.google.com/uc?export=view&id=1Sjyi9mshnD5m7azAx8iOadrgriQIN2-H)
+![Ops! Click here to see the pic](https://res.cloudinary.com/mcstorage/image/upload/v1602264893/modale-lg-min_vxmhrr.png)
 
 
+&nbsp;
 
 
+![Ops! Click here to see the pic](https://res.cloudinary.com/mcstorage/image/upload/v1602264892/modale-sm-min_zpsimf.png)
 
 
 
