@@ -1,65 +1,63 @@
-// Milestone 1:
-// Creare un layout base con una searchbar (una input e un button) in cui possiamo
-// scrivere completamente o parzialmente il nome di un film. Possiamo, cliccando il
-// bottone, cercare sull’API tutti i film che contengono ciò che ha scritto l’utente.
-// Vogliamo dopo la risposta dell’API visualizzare a schermo i seguenti valori per ogni
-// film trovato:
-// 1. Titolo
-// 2. Titolo Originale
-// 3. Lingua
-// 4. Voto
+//  BONUS -- IDEE
+// - grafica con modale a tutta pagina per le info del film  OK CIRCA
+// - select sort by per riordinare i film OK
+// - select per scegliere lingua inglese o italiano OK
+// - bottoni avanti indietro per cambiare pagina se ci sono più di 20 risultati OK
+// - ricerca di partenza con film di tendenza (API discover di TMDB) e tasto home  OK
+// - genre select che mostra solo generi effettivamente presenti OK
+// - cambio pagina con swipe in mediaquery smartphone (CI SAREBBE DA UTILIZZARE JQUERY MOBILE CHE PERò è ABBASTANZA INVASIVO CAMBIA UN PO' IL LAYOUT DELLA PAGINA. ALTRIMENTI SI PUò STUDIARE COME FARE LO SWIPE EVENT CON JS VANILLA MA SAREBBE MEGLIO STUDIARCI UN PO' PER CAPIRLO PIUTTOSTO CHE FARE COPIA INCOLLA)
 
-// API TMDB (THE MOVIE DATA BASE) sito internet che fornisce un api gratuita per accedere al suo database di dati su film serie tv ecc.
-// Hi mcurtaz,
 
-// Your request for an API key has been approved. You can start using this key immediately.
-//
-// API Key: db8b1c040d8d94836ca1164e898cff48
-//
-// An example request looks like:
-// https://api.themoviedb.org/3/movie/550?api_key=db8b1c040d8d94836ca1164e898cff48
+// TO-DO LIST
+// si scoprì che i generi per film e serie tv hanno due api diverse e alcuni generi si sovrappongono altri no. Idea soluzione è fare una mega funzione che stampa tutti i generi film sia in ita che in inglese. poi stampare i generi serie tv in ita e inglese ma soltanto controllando prima di stampare se $("option [conID].eClasselingua") esiste già, non stampo. se no stampo. Altro metodo potrebbe essere stampare tutto e poi eliminare eventuali duplicati basandoti sul testo. l'idea sarebbe:
+// - variabile array ok e variabile array da eliminare. -ciclo su tutte le option. - se $(this).text() non esiste negli array ok la metto negli array ok se esiste già metto $(this) cioè l'intera option nell'array da eliminare (che sarà quindi un array di "indirizzi") poi ciclo con each su array da eliminare e uso .remove()
 
-//Documentation: https://www.themoviedb.org/documentation/api
 
-// Milestone 2:
-// Trasformiamo il voto da 1 a 10 decimale in un numero intero da 1 a 5, così da
-// permetterci di stampare a schermo un numero di stelle piene che vanno da 1 a 5,
-// lasciando le restanti vuote (troviamo le icone in FontAwesome).
-// Arrotondiamo sempre per eccesso all’unità successiva, non gestiamo icone mezze
-// piene (o mezze vuote :P)
-// Trasformiamo poi la stringa statica della lingua in una vera e propria bandiera della
-// nazione corrispondente, gestendo il caso in cui non abbiamo la bandiera della
-// nazione ritornata dall’API (le flag non ci sono in FontAwesome).
-// Allarghiamo poi la ricerca anche alle serie tv. Con la stessa azione di ricerca
-// dovremo prendere sia i film che corrispondono alla query, sia le serie tv, stando
-// attenti ad avere alla fine dei valori simili (le serie e i film hanno campi nel JSON di
-// risposta diversi, simili ma non sempre identici)
-
+// AGGIUNGI SORT DOPO LA STAMPA CHE SE UNO LASCIA SELEZIONATO RIORDINA
 $(document).ready(init);
 
 function init() {
-  printGenresSelect();
+  printGenresSelect("movie", "it-IT");
+  printGenresSelect("movie", "en-EN");
+  printGenresSelect("tv", "it-IT");
+  printGenresSelect("tv", "en-EN");
   addSearchListeners();
-  addFilterGenresListener()
+  addFilterGenresListener();
+  showInfo();
+  // al caricamento della pagina faccio partire due send request in modo che la home siano i film più popolari
+  sendRequest("ajaxdiscover", "movie", "1");
+  sendRequest("ajaxdiscover", "tv", "1");
+  addHomeButtonListener();
+  addSortBySelectListener();
+  addPageButtonsListener();
+  addLanguageSelectListener();
+  addFilterMenuToggle();
 }
 
 // FUNZIONE CHE CHIEDE ALL'API I GENERI DISPONIBILI E STAMPA LA SELECT
-function printGenresSelect(){
+function printGenresSelect(type, lng){
+
+
 
   $.ajax({
-    url: "https://api.themoviedb.org/3/genre/movie/list",
+    url: "https://api.themoviedb.org/3/genre/" + type + "/list",
     method: "GET",
     data: {
-      "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
-      "language": "it-IT" // scelgo la lingua italiana
+      "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia personale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
+      "language": lng // scelgo la lingua italiana
     },
     success: function (data){
       var genres = data["genres"];
       var target = $("#genre-select");
 
       for (var i = 0; i < genres.length; i++) {
-        optionHTML = `<option value="${genres[i]["id"]}" >${genres[i]["name"]}</option>`;
-        target.append(optionHTML);
+
+        if(!$(`#genre-select option[value="${genres[i]["id"]}"].${lng}`).length){ // se l'option con quell'id e quella lingua esistono già nell'html $(option[conID].classelingua).length == maggiore di uno a seconda di quanti ne trova. se non ci sono elementi corrispondenti a quella selezione la length è 0. quindi se non ci sono elementi la length 0 darebe falso, ci metto il ! not davanti e stampo la option solo se non c'è già. In questo modo evito sovrapposizioni tra i risultati della lista dei generi dei film e delle serietv
+
+          optionHTML = `<option value="${genres[i]["id"]}" class="${lng}" >${genres[i]["name"]}</option>`;
+          target.append(optionHTML);
+        }
+
       }
 
 
@@ -70,6 +68,9 @@ function printGenresSelect(){
   });
 
 }
+
+
+// ------------  FUNZIONI DI RICERCA E STAMPA IN PAGINA DELLE CARD
 
 // LISTENER SU EVENTI CHE FANNO PARTIRE LA FUNZIONE CON L'AJAX
 function addSearchListeners() {
@@ -83,8 +84,8 @@ function addSearchListeners() {
    $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
 
    if (input != "") {
-     sendRequest(input, "movie"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
-     sendRequest(input,"tv");
+     sendRequest(input, "movie", "1"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
+     sendRequest(input,"tv", "1");
    }
 
  });
@@ -100,6 +101,7 @@ function addSearchListeners() {
 
      $("#searchbar").val(""); // svuoto l'input. la stringa resta comunque salvata nella variabile input
 
+     $("#searchbar").blur();
      sendRequest(input,"movie"); // faccio partire la funzione con lo stesso input prima per i film  poi per le serie tv
      sendRequest(input,"tv");
    }
@@ -109,41 +111,62 @@ function addSearchListeners() {
 }
 
 // FUNZIONE CHE MANDA UNA RICHIESTA ALL'API
-function sendRequest(input, type) {
+function sendRequest(input, type, page) {
 
   var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results.
 
+  var genreSelectOptions =  $("#genre-select option").hide(); // nascondo anche tutte le opzioni della select per genere poi mostrerò soltanto quelle presenti nei risultati della ricerca con una funzione apposita
+
   target.text(""); // prima svuoto il target dalle ricerche precedenti
 
-  if(type == "movie"){ // cambio l'url a seconda se devo mandare una richiesta per cercare film o serie tv.
-    var url = "https://api.themoviedb.org/3/search/movie"; // url dell'API di TMDB per ricerca nei film
-  } else {
-    var url = "https://api.themoviedb.org/3/search/tv"; // url dell'API di TMDB per ricerca nelle serietv
-  }
+  target.data("query", input); // salvo l'input in un data in modo da poterlo recuperare quando occorre. per esempio per passare alla pagina successiva
+
+  var url = getUrl(input, type);
+
+  var lng = $("#language-select").val(); // prendo la lingua dalla select
+
 
   $.ajax({
     url: url,
     method: "GET",
     data: {
       "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
-      "query": input, // la query è la stringa su cui si farà la ricerca. gli passo quello che ha scritto l'utente nell'input
-      "language": "it-IT" // scelgo la lingua italiana
+      "query": input, // la query è la stringa su cui si farà la ricerca. gli passo quello che ha scritto l'utente nell'input. se è "ajaxdiscover" lascio input vuoto e verrà ignorato
+      "language": lng, // gli passo la lingua dalla select
+      "page": page
     },
     success: function (data, success) {
       var arrayResults = data["results"];
-        if (arrayResults.length == 0){ // se sono nel success ma l'array di risultati è vuoto significa che ho cercato ma non ho trovato niente. stampo un messaggio per l'utente
 
-          $(`#${type}-search-results`).html(`<h3>Mi dispiace non abbiamo trovato risultati per questa categoria.</h3>`);
+      pagesHandler(data, input, type); // questa funzione stampa in pagina il numero di pagine e attiva/disattiva i bottoni pagina avanti e pagina indietro
 
-        } else{ // se invece ci sono dei risultati ciclo su film per film e mando una richiesta per sapere gli attori. questa operazione va fatta qui. ASINCRONICITÀ DELLE FUNZIONI. SE CERCO DI FARLA DOPO LA PRIMA API LANCIA FUNZIONI CON TEMPI DIVERSI E MI RITROVO A STAMPARE IN PAGINA QUANDO LA SECONDA API NON HA ANCORA FINITO. INVECE LA STAMPA PARTIRÀ SOLO QUANDO AVRÒ RICEVUTO I DATI ANCHE DA QUESTA SECONDA API.
+      if (arrayResults.length == 0){ // se sono nel success ma l'array di risultati è vuoto significa che ho cercato ma non ho trovato niente. stampo un messaggio per l'utente
 
-        // POSSIBILE SOLUZIONE DUE: DENTRO QUESTO FOR COMINCIO A STAMPARE IL TEMPLATE HANDLEBAR. STAMPO ANCHE L'ID DEL FILM NEL TEMPLATE IN UN DATA-ID POI ALLA FINE DEL FOR LANCIO UNA FUNZIONE CHE MANDA LA RICHIESTA ALL'API PER IL CAST PARTENDO DALL'ID DELL'OGGETTO arrayResult[i] SU CUI STO CICLANDO. POI PER APPENDERLO CERCO NELL'HTML IL DATA-ID CHE SICURAMENTE SARÀ GIÀ NELL'HTML PERCHÈ QUANDO HO LA RISPOSTA DEL PRIMO AJAX LA STAMPA È PRATICAMENTE IMMEDIATA NEL FOR, POI LANCIO IL SECONDO AJAX E QUANDO MI RISPONDE SICURAMENTE IL FOR CHE STAMPA QUELL'ID LÌ È GIÀ CONCLUSO. QUESTA SECONDA SOLUZIONE MI EVITA ANCHE DI LANCIARE LA FUNZIONE PRINT SEARCH RESULT NELL'ERROR DELLA CHIAMATA PER IL CAST (CHE STAMPA LA CARD DEL FILM/SERIETV ANCHE SE IL CAST RISULTA 404 PAGE NOT FOUND COSA CHE SUCCEDE SPESSO COI FILM MINORI)
-          for (var i = 0; i < arrayResults.length; i++) {
+        $(`#${type}-search-results`).html(`<h3>Non ci sono risultati per questa categoria.</h3>`);
 
-            sendCastRequest(arrayResults[i], type);
+      } else{
 
-          }
+        for (var i = 0; i < arrayResults.length; i++) {
+
+          printSearchResults(arrayResults[i], type); // la funzione con handlebars stampa tutte le card dei film risultanti dalla ricerca
+
+          printCast(arrayResults[i], type); // la funzione cast ha bisogno di un ajax specifico sui credits del film. Dopo aver stampato in pagina il film e tutto lancio la chiamata identificando successivamente dove andare a stampare il cast attraverso l'id del film
+
+          showGenreSelectOption(arrayResults[i], lng); // questa funzione mostra nelle select dei generi solo i generi presenti nei risultati della ricerca
+
         }
+
+        toggleLanguageInfoModal(lng, type);
+
+        printGenreNames(arrayResults, type);
+
+        missingImages(); // questa funzione corregge eventuali errori per immagini mancanti sostituendo con altre immagini o avvisi appositi.
+
+        sortCard(); // finito di stampare riordino anche le card in base alla selezione della select sort-by
+
+        filterGenres();
+
+      }
 
 
     },
@@ -155,8 +178,33 @@ function sendRequest(input, type) {
 
 }
 
+
+// FUNZIONE CHE RESTITUISCE L'URL PER L'AJAX A SECONDA DELL'INPUT E DEL TYPE
+function getUrl(input, type) {
+  if (input == "ajaxdiscover"){ // l'input discover è quello della pagina iniziale con i film più popolari. lo integro nella send request in modo da avere un unica funzione che gestisce tutte le ricerche. c'è da dire che l'utente non può cercare un film o una serie che si chiama ajaxdiscover. pace
+
+    if(type == "movie"){ // cambio l'url a seconda se devo mandare una richiesta per cercare film o serie tv.
+      var url = "https://api.themoviedb.org/3/discover/movie"; // url dell'API di TMDB per film
+    } else {
+      var url = "https://api.themoviedb.org/3/discover/tv"; // url dell'API di TMDB  serietv
+    }
+
+    input = ""; // la discover basta un url non è necessaria una stringa da ricercare. se comunque nell'ajax passo la chiave query con stringa vuota viene ignorata
+
+  } else {
+
+    if(type == "movie"){ // cambio l'url a seconda se devo mandare una richiesta per cercare film o serie tv.
+      var url = "https://api.themoviedb.org/3/search/movie"; // url dell'API di TMDB per ricerca nei film
+    } else {
+      var url = "https://api.themoviedb.org/3/search/tv"; // url dell'API di TMDB per ricerca nelle serietv
+    }
+  }
+
+  return url
+}
+
 // FUNZIONE CHE CON I DATI DEL FILM MANDA RICHIESTA DI UN API PER SAPERE I NOMI DEGLI ATTORI
-function sendCastRequest(obj, type){
+function printCast(obj, type){
   // gli id sono univoci per categoria: film o serietv. servono due chiamate diverse.
 
 
@@ -167,61 +215,67 @@ function sendCastRequest(obj, type){
       "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia percsonale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
     },
     success: function (data) {
+
       var cast = data["cast"];
-      printSearchResults(obj, cast, type);
+      var actors = [];
+      var target = $(`#${type}-search-results li[data-id="${obj["id"]}"]`);
+
+      if(cast.length == 0 || cast == undefined){ // ATTENZIONE: per mettere nelle condizioni array vuoto conviene usare array.length perchè un array vuoto in booleano è true. (non come le stringhe che in booleano danno false)
+        actors = "nessun dato sul cast";
+
+      } else{
+
+        for (var i = 0; i < 5 && i < cast.length; i++) {
+          actors.push(" " + cast[i]["name"]);
+        }
+
+      }
+
+      target.find(".actors .actor-list").text(actors);
+
     },
     error: function (err) {
     // Spesso il cast non c'è in archivio. avendo comunque i dati del film faccio partire la funzione che stampa inizializzando l'array che contiene i nomi del cast ad undefined.
-      var cast = undefined;
-      printSearchResults(obj, cast, type);
+      var target = $(`#${type}-search-results li[data-id="${obj["id"]}"]`);
+      target.find(".actors").html("<strong>Attori: </strong> nessun dato sul cast");
     }
   });
 
 }
 
 // FUNZIONE CHE STAMPA I RISULTATI DELLA RICERCA IN PAGINA
-function printSearchResults(objResult, arrayCast, type) {
+function printSearchResults(objResult, type) {
 
   var template = $("#result-template").html(); // salvo il template per handlebars in una variabile
-
-  // ------- index.html -----  template di handlebars nell'html------
-  // l'API mi restituisce un oggetto con chiavi e valori con i dati dei vari film trovati. UTILIZZANDO IN HANDLEBARS LE STESSE CHIAVI CHE UTILIZZA L'API POSSO PASSARGLI DIRETTAMENTE L'OGGETTO MANDATO DALL'API. OVVIAMENTE LE CHIAVI NON RICHIESTE DA HANDLEBARS VERRANNO SEMPLICEMENTE IGNORATE
-  // <li>
-  //   <div class="title">{{ title }}</div>
-  //   <div class="original-title">{{ original_title }}</div>
-  //   <div class="language">{{ original_language }}</div>
-  // ATTENZIONE: LA CHIAVE STARS NELL'OGGETTO MANDATO DALL'API NON C'è VERRà AGGIUNTA CON UNA FUNZIONE. SE AD HANDLEBARS PASSO UNA STRINGA CHE è CODICE HTML LO STAMPA COME TESTO SE MESSO AL POSTO DI {{codice_html}} CON LE TRE PARENTESI GRAFFE INVECE VIENE INTERPRETATO COME CODICE HTML {{{codice_html}}}
-  //   <div class="stars">{{{stars}}}</div>
-  // </li>
-
 
   var compiled = Handlebars.compile(template); // nella variabile compiled ci sarà un funzione di handlebars che compila il template sostituendo le chiavi con i valori corrispondenti
 
   var target = $(`#${type}-search-results`); // il target è dove andrò ad appendere l'html compilato da handlebars. Sono due target diversi per film e serie tv. uno è #films-search-results, l'altro tv-search-results.
 
-  var objToPrint = getObjToPrint(objResult, arrayCast, type) // a questa funzione passo tutti i dati ricevuti dalle due api. manipola i vari oggetti array e dati e mi restituisce un oggetto pronto per compilare il template di HANDLEBARS
+  var objToPrint = getObjToPrint(objResult, type) // a questa funzione passo tutti i dati ricevuti dalle due api. manipola i vari oggetti array e dati e mi restituisce un oggetto pronto per compilare il template di HANDLEBARS
 
   var objHTML = compiled(objToPrint); // compilo
 
   target.append(objHTML); // stampo nell'HTML
 
-  missingImages(); // questa funzione corregge eventuali errori per immagini mancanti sostituendo con altre immagini o avvisi appositi.
-
-
 }
 
 // FUNZIONE CHE CREA L'OGGETTO DA STAMPARE
-function getObjToPrint(obj, arrayCast, type){
+function getObjToPrint(obj, type){
 
-    // ----------     POSTER
-
-
-    var poster = `https://image.tmdb.org/t/p/w342/${obj["poster_path"]}` // creo l'url del poster. è composto da url del database immagini (https://image.tmdb.org/t/p/) + dimensione dell'immagine richiesta (w185/) + ultima parte per identificare il film/serie tv fornita dall'api nell'oggetto alla chiave "poster_path"
-
-    obj["poster"] = poster; // creo un apposita chiave nell'oggetto currentObj che avrà una corrispondenza nel template di Handlebars
+  // ----------     POSTER
 
 
+  var poster = `https://image.tmdb.org/t/p/w342/${obj["poster_path"]}` // creo l'url del poster. è composto da url del database immagini (https://image.tmdb.org/t/p/) + dimensione dell'immagine richiesta (w185/) + ultima parte per identificare il film/serie tv fornita dall'api nell'oggetto alla chiave "poster_path"
 
+  obj["poster"] = poster; // creo un apposita chiave nell'oggetto currentObj che avrà una corrispondenza nel template di Handlebars
+
+
+  // ----------  BACKDROP POSTER
+
+  var backdropPoster = `https://image.tmdb.org/t/p/w500/${obj["backdrop_path"]}`
+
+  obj["back_poster"] = backdropPoster;
   // TITOLO E TITOLO ORIGINALE
 
     // alcune chiavi dell'oggetto mandato dall'API cambiano se la ricerca è per film o serie tv. nello specifico a me servono title e original_title che per le serie tv si chiamano name e original_name
@@ -255,32 +309,23 @@ function getObjToPrint(obj, arrayCast, type){
   if(!obj["overview"]){ // se non è presente la trama scrivo trama non disponibile
     obj["overview"] = "Trama non disponibile."
   } else {
-    if (obj["overview"].length > 250) { // se la trama è più lunga di 250 caratteri prendo solo i primi 250 e aggiungo "..." è tipo un text overflow fatto con js
-      obj["overview"] = obj["overview"].substring(0, 250) + "...";
-    }
+
+    // ---- se si volesse limitare la lunghezza della trama aggiungendo i puntini dopo 250 caratteri
+    // if (obj["overview"].length > 250) { // se la trama è più lunga di 250 caratteri prendo solo i primi 250 e aggiungo "..." è tipo un text overflow fatto con js
+    //   obj["overview"] = obj["overview"].substring(0, 250) + "...";
+    // }
   }
 
 
-  // --------    ATTORI
+  // -------- ANNO DI RILASCIO
 
-  var actors = [];
+  if(type == "movie"){
 
-  if(arrayCast.length == 0 || arrayCast == undefined){ // ATTENZIONE: pre mettere nelle condizioni array vuoto conviene usare array.length perchè un array vuoto in booleano è true. (non come le stringhe che in booleano danno false)
-    actors = "nessun dato sul cast"
-  } else{
-    for (var i = 0; i < 5 && i < arrayCast.length; i++) {
-      actors.push(" " + arrayCast[i]["name"]);
-    }
+    obj["year"] = obj["release_date"].slice(0, 4);
+  } else {
+    obj["year"] = obj["first_air_date"].slice(0, 4);
   }
 
-  obj["actors"] = actors;
-
-
-  // --------  GENERI
-
-  var genres = getGenresNames(obj);
-
-  obj["genres"] = genres;
   return obj
 
 }
@@ -306,30 +351,6 @@ function getStars(obj) {
   return stars // la funzione ritorna una stringa che sarà una serie di "<i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>". Nell'html si vedranno 5 stelle.
 }
 
-// FUNZIONE CHE CREA LA LISTA DI GENERI
-function getGenresNames(obj){
-
-  var ids = obj["genre_ids"]; // per ogni film/serie prendo la lista di ids
-  var genres = [];
-
-  if (ids.length == 0){ // ATTENZIONE: per mettere nelle condizioni array vuoto conviene usare array.length perchè un array vuoto in booleano è true. (non come le stringhe che in booleano danno false)
-
-    genres = "Nessun genere trovato";
-
-  } else {
-
-    for (var i = 0; i < ids.length; i++) { // se è presente una lista di ids ciclo sulla lista. Nella select dei generi ho delle option con id del genre nel value e nome corrispondente nel testo della option. Userò quelle
-      var listGenreId = $(`#genre-select option[value="${ids[i]}"]`); // seleziono la option con l'ID corrispondente a un id della lista id dei generi del film in oggetto
-
-      var listGenreName = listGenreId.text(); // prendo il text di quella option
-
-      genres.push(" " + listGenreName); // lo pusho in un array dei generi con uno spazio per separarli. La virgola tra uno e l'altro la stampa in automatico quando stampi un array.
-    }
-  }
-
-  return genres // la funzione ritorna la lista di generi
-}
-
 // FUNZIONE PER LA GESTIONE DI IMMAGINI MANCANTI
 function missingImages() { // finito di stampare tutti i risultati della ricerca
 
@@ -340,7 +361,7 @@ function missingImages() { // finito di stampare tutti i risultati della ricerca
 
     var lng = target.data("lng"); // la funzione che stampa i risultati della ricerca salva nell'attributo data-lng del div la lingua del film (it per italiano, en per inglese ecc ). la vado a recuperare, la salvo nella variabile, e la sostituisco all'immagine "rotta". Sostituisco l'intero contenuto del target.
 
-    target.text(lng);
+    target.html("<strong>Lingua: </strong>&ensp;" + lng);
 
   });
 
@@ -349,25 +370,153 @@ function missingImages() { // finito di stampare tutti i risultati della ricerca
   // altra soluzione ancora: si può utilizzare if anche direttamente in handlebars {#if currentObj["poster_path"]} {{ url }} {/if} {else} {{url}} {/else}
   $(".poster>img").on("error", function(){ // se c'è un errore nellímmagine nel div con classe "poster" che sono le immagini appunto dei poster a quell'immagine do attributo src l'url della classica immagine "Image Not Found"
     $(this).attr("src", "./img/imgNotFound.png");
-    $(this).siblings(".no-img").css("display", "block");
+    $(this).siblings(".no-img-title").css("display", "block");
+    $(this).parent(".poster").addClass("no-img");
+  });
+
+  $(".info-header>img").on("error", function(){
+    $(this).attr("src", "./img/back-img-not-found.jpg");
+  });
+}
+
+// FUNZIONE CHE MOSTRA NELLA SELECT DEI GENERI SOLTANTO I GENERI PRESENTI NEI FILM/TV STAMPATI IN PAGINA
+function showGenreSelectOption(obj, lng){
+
+  $(`#genre-select option[value="all"].${lng}`).show(); // mostro l'option tutti/all
+
+  var arrayGenres = obj["genre_ids"];
+
+  for (var i = 0; i < arrayGenres.length; i++) {
+    $(`#genre-select option[value="${arrayGenres[i]}"].${lng}`).show(); // scorro tutti gli id di genere e mostro la option con value id del genere
+  }
+}
+
+// FUNZIONE PER LA GESTIONE DEL CONTATORE DELLE PAGINE E DEI TASTI.
+function pagesHandler(obj, query, type){
+
+  var currentPageTarget = $(`#${type}-pages #${type}-current-page`);
+  var totalPagesTarget = $(`#${type}-pages #${type}-total-pages`);
+
+  // nell'oggetto di risposta se non ci sono risultati ti da totalpages 0 e page 1. per ovviare se non ci sono results do entrambi a 0 in modo che in pagina stamperò 0/0
+  if (obj["results"].length == 0){
+    var currentPage = 0;
+    var totalPages = 0;
+
+  } else {
+    // altrimenti prendo il numero di pagina corrente
+    var currentPage = obj["page"];
+    var totalPages = obj["total_pages"];
+
+  }
+
+  currentPageTarget.text(currentPage);
+  totalPagesTarget.text(totalPages);
+
+  // gestione dei bottoni attraverso la classe active.
+
+  var nextButtonTarget = $(`#${type}-pages #${type}-next-btn`);
+  var prevButtonTarget = $(`#${type}-pages #${type}-prev-btn`);
+
+  // tolgo la classe active a tutti i bottoni
+  nextButtonTarget.removeClass("active");
+  prevButtonTarget.removeClass("active");
+
+  if (!(totalPages <= 1)){ // se il numero totale di pagine è 0 o 1 non attivo nessun bottone. da 2 in poi entro nel secondo if
+    if (currentPage == 1){ // se sono a pagina 1 e le pagine sono almeno 2 attivo il pagina avanti e non quello pagina indietro
+      nextButtonTarget.addClass("active");
+    } else if (currentPage == totalPages){ // se sono all'ultima pagina attivo il bottone pagina indietro e non il pagina avanti
+      prevButtonTarget.addClass("active");
+    } else { // altrimenti attivo entrambi i bottoni
+      nextButtonTarget.addClass("active");
+      prevButtonTarget.addClass("active");
+    }
+  }
+
+
+}
+
+// FUNZIONE PER LA STAMPA DEI GENERI CON UN AJAX DELLA LISTA generi
+function printGenreNames(arrayResults, type) {
+
+  var lng = $("#language-select").val();
+
+  $.ajax({
+    url: "https://api.themoviedb.org/3/genre/" + type + "/list",
+    method: "GET",
+    data: {
+      "api_key": "db8b1c040d8d94836ca1164e898cff48", // la mia personale chiave api che utilizzano dal server per riconoscere quale utente sta facendo la ricerca
+      "language": lng // scelgo la lingua italiana
+    },
+    success: function (data){
+
+      var genres = data["genres"];
+
+      for (var i = 0; i < arrayResults.length; i++) {
+
+        getGenresNames(arrayResults[i], genres, type);
+
+      }
+
+
+    },
+    error: function(err){
+      console.log("err", err);
+    }
   });
 
 }
+
+// FUNZIONE CHE CREA LA LISTA DI GENERI
+function getGenresNames(obj, genreList, type){
+
+  var target = $(`#${type}-search-results li[data-id="${obj["id"]}"]`); // il target è la card del film stampata in pagina con il data-id corrispondente al film in questione
+
+
+  var genreIds = obj["genre_ids"]; // per ogni film/serie prendo la lista di ids
+  var genresNames = [];
+
+  if (genreIds.length == 0){ // ATTENZIONE: per mettere nelle condizioni array vuoto conviene usare array.length perchè un array vuoto in booleano è true. (non come le stringhe che in booleano danno false)
+
+    genresNames = "Nessun genere trovato";
+
+  } else {
+
+    for (var i = 0; i < genreIds.length; i++) { // se è presente una lista di ids ciclo sulla lista.
+
+      var genreListElement = genreList.filter(function(e) { // questa funzione filtra l'array della lista generi e ritorna l'oggetto che ha alla chiave id (e["id"]) un valore che corrisponde al genreIds[i]. cioè io sto scorrendo su tutti gli genere id del singolo film che può avere più generi quindi sarà una roba tipo 34, 99. 1070 e io scorro e ne prendo uno alla volta. Poi dalla lista dei generi con relativi nomi (che è una roba tipo id34 nomeCommedia, id99 nomeAvventura) prendo quell'oggetto che ha lo stesso id
+      return e["id"] == genreIds[i];
+      });
+
+      if (genreListElement[0] != undefined){ // a volte qualcosa va storto e non trova corrispondenza tra genere id e un oggetto con lo stesso id nella lista dei generi. per evitare che mi dia l'errore in console se non trova l'oggetto con quell'id non fa nulla e passa al genere successivo
+
+        var genreName = genreListElement[0]["name"]; // la funzione di prima non restituisce un oggetto ma un array contenente tutti gli oggetti con quella caratteristica (stesso id) che essendo l'id univoco sarà un array con un solo oggetto (id: numero, name: nome del genere). Mi prendo il nome del genere e lo pusho in un array di tutti i nomi dei generi del film in questione
+
+        genresNames.push(" " + genreName);
+      }
+    }
+
+    target.find(".genre-list").text(genresNames);
+  }
+}
+
+
+// -------------------  FUNZIONI DI FILTRO DEI RISULTATI
+
 
 // FUNZIONE CHE AGGIUNGE UN LISTENER ALLA SELECT CHE FILTRA PER GENERE
 function addFilterGenresListener() {
   $("#genre-select").change(function(){
 
-    var selectedGenre = $(this).val();
 
-    filterGenres(selectedGenre);
+    filterGenres();
 
   });
 }
 
 // FUNZIONE CHE FILTRA LE CARD DA VISUALIZZARE IN BASE AL GENERE
-function filterGenres(selectedGenre){
+function filterGenres(){
 
+  var selectedGenre = $("#genre-select").val();
   //  due diversi target per movie e serie tv. il genere selezionato viene passato come argomento. i generi sono sotto forma di id identificativo. se sono più generi nel data-genres trovo una stringa del tipo 99,880,25 se però è un genere solo nel data-genres troverò un numero
   var movieTarget = $("#movie-search-results li");
 
@@ -386,7 +535,7 @@ function filterGenres(selectedGenre){
 
     movieTarget.each(function(){ // scorro tutti gli elementi li dei film (le mie card di film)
 
-      var targetGenresIds = $(this).data("genres"); // per ognuno prendo i generi
+      var targetGenresIds = $(this).find(".genres").data("genres"); // per ognuno prendo i generi
 
       if(isNaN(targetGenresIds) && targetGenresIds.includes(selectedGenre)){ // se non è un numero e quindi è una stringa di generi utilizzo includes() per trovare le corrispondenze e mostrare le card
 
@@ -404,7 +553,7 @@ function filterGenres(selectedGenre){
 
     tvTarget.each(function(){ // ripeto le stesse operazioni per le card delle serie tv
 
-      var targetGenresIds = $(this).data("genres");
+      var targetGenresIds = $(this).find(".genres").data("genres");
 
       if(isNaN(targetGenresIds) && targetGenresIds.includes(selectedGenre)){
 
@@ -420,6 +569,245 @@ function filterGenres(selectedGenre){
 
     });
   }
+
+}
+
+// FUNZIONE CHE AGGIUNGE UN LISTENER ALLA SELECT CHE RIORDINA LE card
+function addSortBySelectListener(){
+
+  $("#filters #sort-by-select").change(sortCard);
+
+}
+
+// FUNZIONE CHE RIORDINA LE CARD A SECONDA DEL PARAMETRO SELEZIONATO
+function sortCard(){
+
+  var movieTarget = $("#movie-search-results li");
+  var tvTarget = $("#tv-search-results li");
+
+  movieTarget.sort(sortBy).appendTo("#movie-search-results"); // il metodo sort accetta come parametro una funzione che definisce meglio come riordinare. Utilizzando .appendTo non aggiunge elementi ma ristampa gli stessi elementi nel nuovo ordine
+  tvTarget.sort(sortBy).appendTo("#tv-search-results");
+
+}
+
+// FUNZIONE CHE GESTISCE IL RIORDINO DELLE CARD
+function sortBy(a, b){
+
+  // la funzione dentro al sort prende come argomenti a e b che rappresentano due generici elementi da riordinare. Se la funzione restituisce 1 l'elemento a va posizionato prima di b. -1 b prima di a. 0 non si scambiano. In questo caso nel li ho salvato dei data-attributo per ogni confronto che voglio fare. prendo il .val() della select e utilizzo il data corrispondente (data-popularity, data-title, data-year .. .. )
+
+  var by = $("#sort-by-select").val();
+
+  if (by == "title"){
+
+    if ($(a).data(by) > $(b).data(by)){
+      return 1
+    } else if ($(a).data(by) < $(b).data(by)){
+      return -1
+    } else {
+      return 0
+    }
+
+  } else {
+    return ($(b).data(by) - $(a).data(by))
+  }
+
+
+}
+
+// FUNZIONE CHE MOSTRA/NASCONDE GLI ELEMENTI STATICI IN PAGINA IN BASE ALLA Lingua
+function toggleLanguage(){
+
+  var lng = $("#language-select").val();
+
+  $(".it-IT").hide();
+  $(".en-EN").hide();
+
+  $("." + lng).show();
+
+  // cambio le selezioni della select nella lingua giusta
+  var genreSelected = $("#genre-select").val();
+  var sortSelected = $("#sort-by-select").val();
+
+  $(`#genre-select option[value="${genreSelected}"].${lng}`).prop("selected", "selected");
+
+  $(`#sort-by-select option[value="${sortSelected}"].${lng}`).prop("selected", "selected");
+}
+
+// FUNZIONE CHE CAMBIA LA LINGUA ALLE INTESTAZIONI NELLE INFO FILM
+function toggleLanguageInfoModal(lng, type){
+
+  // nascondo tutto
+  $(`#${type}-search-results .it-IT`).hide();
+  $(`#${type}-search-results .en-EN`).hide();
+
+  // mostro quello che serve
+  $(`#${type}-search-results .${lng}`).show();
+
+
+}
+
+
+
+// ------------------  BOTTONI E INTERAZIONI
+
+
+
+// FUNZIONE LISTENER PER TASTI PAGINA AVANTI/PAGINA indietro
+function addPageButtonsListener(){
+
+  $("#movie-prev-btn").click(function(){
+
+    if($(this).hasClass("active")){ // se clicco sul bottone e questo ha la classe active
+      var query = $("#movie-search-results").data("query"); // prendo la query da dove l'ho salvata. Potrebbe essere "discover" o l'ultima ricerca fatta
+      var currentPage = $("#movie-current-page").text(); // prendo dalla stampa in pagina che pagina sto visualizzando attualmente
+      var page = parseInt(currentPage) - 1; // calcolo che pagina dovrò visualizzare
+
+      sendRequest(query, "movie", page); // faccio una request con query, type, e numero di pagina
+    }
+
+  });
+
+  $("#movie-next-btn").click(function(){
+
+    if($(this).hasClass("active")){
+        var query = $("#movie-search-results").data("query");
+        var currentPage = $("#movie-current-page").text();
+        var page = parseInt(currentPage) + 1;
+        sendRequest(query, "movie", page);
+      }
+  });
+
+  $("#tv-prev-btn").click(function(){
+
+    if($(this).hasClass("active")){
+      var query = $("#tv-search-results").data("query");
+      var currentPage = $("#tv-current-page").text();
+      var page = parseInt(currentPage) - 1;
+
+      sendRequest(query, "tv", page);
+    }
+
+  });
+
+  $("#tv-next-btn").click(function(){
+
+    if($(this).hasClass("active")){
+      var query = $("#tv-search-results").data("query");
+      var currentPage = $("#tv-current-page").text();
+      var page = parseInt(currentPage) + 1;
+
+      sendRequest(query, "tv", page);
+    }
+
+  });
+
+}
+
+// FUNZIONE CHE AL TASTO HOME STAMPA I FILM PIù POPOLARI
+function addHomeButtonListener(){
+  $("#btn-home").click(function(){
+    $('#genre-select').val('all');
+    $('#sort-by-select').val('popularity');
+    sendRequest("ajaxdiscover", "movie", "1");
+    sendRequest("ajaxdiscover", "tv", "1");
+  });
+}
+
+// FUNZIONE CHE MOSTRA LE INFO DEL FILM AL CLIK SULLA CARD
+function showInfo(){
+
+  $(document).on("click", "#movie-search-results li", function(){ // al click su un li della lista film mostro le info del film tipo modal
+
+     $(this).find(".item-data-container").fadeIn(); // dal li cliccato cerco il figlio item data container e lo mostro
+
+     $("body").addClass("stop-scroll"); // la classe stop-scroll da overflow: hidden al body in modo che quando ho aperto la modal la pagina sotto non possa più scrollare
+  });
+
+  $(document).on("click", "#tv-search-results li", function(){
+
+     $(this).find(".item-data-container").fadeIn();
+
+     $("body").addClass("stop-scroll");
+  });
+
+
+  $(document).on("click", ".item-data-container .close-icon i", function(e){ // al click sull'icona chiudi cerco il padre item data container e lo nascondo
+      $(this).parents(".item-data-container").fadeOut();
+      $("body").removeClass("stop-scroll");
+  });
+
+  $(document).on("click", ".item-data-container", function(e){ // al click su item-data-container che avendo width 100% e height 100vh è l'intera finestra chiudo la modale con le info del film
+
+    e.stopImmediatePropagation(); // ATTENZIONE:  se io clicco su item-data-container il click si propaga nel senso che è come se cliccassi su tutti i genitori quindi per come è strutturato l'html anche sul li che lo contiene. ma il clic sul li apre la modale. quindi la modale si chiude e si riapre subito. stopImmediatePropagation() dice al js di eseguire la funzione e fermare la propagazione del click in questo modo si risolve
+    $(this).fadeOut();
+    $("body").removeClass("stop-scroll");
+
+  });
+
+  $(document).on("click", ".item-data-wrapper", function(e){
+      e.stopImmediatePropagation(); // ATTENZIONE: per lo stesso principio di prima se io clicco nella modale il click arriva al padre item-data-container che col click chiude la modale. quindi fermo la propagazione. In linea teoriaca comunque la propagazione serve infatti quando io clicco sull'immagine del film il click si propaga fino al li che lo contiene e mostra la modale. Io posso cliccare su qualsiasi elemento all'interno del li e mi si apre la modale.
+  });
+
+}
+
+// FUNZIONE LISTENER SU CAMBIO DI Lingua
+function addLanguageSelectListener(){
+  var languageSelect = $("#language-select");
+
+  languageSelect.change(function(){
+
+    toggleLanguage();
+
+    var lng = languageSelect.val(); // prendo la lingua selezionata
+
+    var movieQuery = $("#movie-search-results").data("query"); // prendo la query da dove l'ho salvata. Potrebbe essere "discover" o l'ultima ricerca fatta
+    var moviePage = $("#movie-current-page").text(); // prendo dalla stampa in pagina che pagina sto visualizzando attualmente
+
+    var tvQuery = $("#tv-search-results").data("query");
+
+    var tvPage = $("#tv-current-page").text();
+
+    sendRequest(movieQuery, "movie", moviePage);
+    sendRequest(tvQuery, "tv", tvPage);
+
+  });
+}
+
+// FUNZIONE CHE MOSTRA NASCONDE IL MENU DEI FILTRI NELLE MEDIAQUERY SMATHPHONE
+function addFilterMenuToggle(){
+
+  $("#filters .hidden-btn").click(function(){
+
+    var target = $("#filters #filters-menu-wrapper"); // ho usato un div wrapper perchè facendo slideToggle su filters-menu mi cambiava il display flex in display block e none. volendo si poteva fare .css("display", "none") e .css("display", "flex") ma avrei perso l'effetto slide. altrimenti chiamare una funzione di callback a slideDown che metteva display flex. (.slideDown(500,function(){$(this).css("display", "flex")})) però avrei dovuto dividere slide up e down e utilizzare tipo una classe d'appoggio o un if su .css("display") per sapere se il menu era aperto o chiuso
+
+    target.slideToggle();
+
+    $(this).find("i.fas").toggleClass("fa-angle-down");
+    $(this).find("i.fas").toggleClass("fa-angle-up");
+  });
+
+  // aggiungo anche un caso limite. Se ho il menu nascosto in formato smartphone e allargo la finestra a formati più grandi il menu rimane nascosto. per risolvere:
+
+  $( window ).resize(function() { // al resize della finestra (quindi quando cambiano le dimensioni della finestra)
+
+    if($(window).width() > 800){ // se è sopra gli 800 px mostro il filter-menu-wrapper
+      var target = $("#filters #filters-menu-wrapper");
+      target.css("display", "block");
+    }
+
+    // se dopo aver fatto il passaggio da smatphone a schermo grande in cui tutto funziona e ricompare il menu filter allineato torno indietro si dovrebbe vedere solo il bottone filter che fa comparire il menu invece il menu compare già aperto. poi comunque il bottone va quindi è una sottigliezza però si può correggere con
+
+    if($(window).width() <= 800){
+      var target = $("#filters #filters-menu-wrapper");
+
+      target.css("display", "none");
+
+      // per lo stesso motivo se allargo e stringo la finestra con il menu aperto rischio che la freccia apri chiudi filter mi rimane al contrario.
+
+      $("#filters .hidden-btn i.fas").addClass("fa-angle-down").removeClass("fa-angle-up");
+    }
+
+  });
 
 
 }
