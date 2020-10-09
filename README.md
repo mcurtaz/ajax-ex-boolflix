@@ -1,6 +1,6 @@
 # Boolfix
 
-![alt text](https://drive.google.com/uc?export=view&id=1oTrdd0MqxQfXgQ_sfzhTgYmfTRSGwHe0)
+![Ops! Click here to see the pic](https://drive.google.com/uc?export=view&id=1oTrdd0MqxQfXgQ_sfzhTgYmfTRSGwHe0)
 
 ### About
 
@@ -32,12 +32,7 @@ Il layout della pagina è responsive.
 Al click sulla card di un film o di una serie tv viene mostrata una modale con informazioni aggiuntive (ottenute grazie ad una seconda API) come voto, trama, cast e altri.
 
 
-![alt text](https://drive.google.com/uc?export=view&id=1Sjyi9mshnD5m7azAx8iOadrgriQIN2-H)
-
-
-
-<img src="https://drive.google.com/uc?export=view&id=18EkfI6qnP-PuIgT8uAWU0G-Bm_LDsOgX" width="250">
-
+![Ops! Click here to see the pic](https://drive.google.com/uc?export=view&id=1Sjyi9mshnD5m7azAx8iOadrgriQIN2-H)
 
 
 
