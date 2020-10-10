@@ -29,7 +29,7 @@ Il layout della pagina è responsive.
 &nbsp;
 
 
-Al click sulla card di un film o di una serie tv viene mostrata una modale con informazioni aggiuntive (ottenute grazie ad una seconda API) come voto, trama, cast e altri.
+Al click sulla card di un film o di una serie tv viene mostrata una modale con informazioni aggiuntive (ottenute grazie ad una seconda API) come voto, trama, cast e altre.
 
 
 ![Ops! Click here to see the pic](https://res.cloudinary.com/mcstorage/image/upload/v1602264893/modale-lg-min_vxmhrr.png)
