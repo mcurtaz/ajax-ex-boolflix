@@ -38,7 +38,7 @@ Al click sulla card di un film o di una serie tv viene mostrata una modale con i
 &nbsp;
 
 
-![Ops! Click here to see the pic](https://res.cloudinary.com/mcstorage/image/upload/v1602264892/modale-sm-min_zpsimf.png)
+<img src="https://res.cloudinary.com/mcstorage/image/upload/v1602264892/modale-sm-min_zpsimf.png" width="250">
 
 
 
