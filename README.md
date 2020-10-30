@@ -5,6 +5,16 @@
 ### About
 
 Il progetto è una pagina web ispirata a Netflix: permette di esplorare un database di film e serie tv utilizzando le API messe a disposizione da [TMDb](https://www.themoviedb.org/) (The Movie Database).
+
+### Tecnologie utilizzate:
+
+- HTML
+- CSS
+- Javascript
+- Jquery
+- Ajax
+- Handlebars
+
 ### Feature
 
 La homepage mostra i film e le serie tv attualmente più popolari sul sito [TMDb](https://www.themoviedb.org/). 
